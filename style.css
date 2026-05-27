@@ -8,66 +8,43 @@ body {
     margin: 0;
 }
 
-h1 {
-    font-size: 20px;
-    color: #333;
-    margin-bottom: 5px;
+h1 { font-size: 20px; color: #333; margin-bottom: 5px; }
+.info { font-size: 14px; color: #666; margin-bottom: 20px; }
+
+/* 全体の外枠スクロールエリア */
+.cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* カードとカードの間の隙間 */
+    width: 340px;
 }
 
-.info {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-/* スタンプ台の外枠 */
-.card-container {
+/* スタンプ台（基盤）1枚の設定 */
+.card-base {
     position: relative;
     width: 340px;
-    height: 500px;
-    /* JS側から動的に背景画像をセットします */
-    background-image: var(--bg-image); 
+    height: 500px; /* cardhaikei.pngの縦横比に合わせて調整してください */
     background-size: cover;
     background-position: center;
     border-radius: 15px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
-/* スタンプを配置するグリッド（3列×4行） */
-.stamp-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px 15px;
-    padding: 40px 20px;
-    margin-top: 80px; /* イラストのマス目位置に合わせてここを調整してください */
-}
-
-/* スタンプが押されるマス目 */
-.stamp-slot {
-    aspect-ratio: 1;
-    border: 2px dashed rgba(0,0,0,0.15); /* 位置確認用の枠（不要なら border: none; に） */
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-
-/* 押されたスタンプ画像 */
-.stamp-image {
-    width: 85%;
-    height: 85%;
+/* 押されるスタンプの共通設定（絶対配置） */
+.stamp-element {
+    position: absolute;
+    width: 50px;  /* スタンプの横幅（穴のサイズに合わせて調整） */
+    height: 50px; /* スタンプの縦幅（穴のサイズに合わせて調整） */
     object-fit: contain;
+    transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes bounceIn {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* メッセージ表示エリア */
 .alert-msg {
     margin-top: 15px;
     padding: 10px 15px;
