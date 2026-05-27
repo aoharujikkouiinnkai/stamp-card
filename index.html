@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>8月限定！配信スタンプカード</title>
-    <script src="images.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="images.js" defer></script>
 </head>
 <body>
 
@@ -16,36 +16,42 @@
 
     <div id="alert-msg" class="alert-msg"></div>
 
+    <div class="debug-controls" style="margin-top: 30px; display: flex; gap: 10px;">
+        <button onclick="addDebugStamp('live')" style="padding: 10px; background: #ff7675; color: white; border: none; border-radius: 5px; cursor: pointer;">テストでLive追加</button>
+        <button onclick="addDebugStamp('archive')" style="padding: 10px; background: #74b9ff; color: white; border: none; border-radius: 5px; cursor: pointer;">テストでArchive追加</button>
+        <button onclick="resetStamps()" style="padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer;">全リセット</button>
+    </div>
+
     <script>
         const STAMPS_PER_CARD = 7;
         const TOTAL_CARDS = 5;
-        const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; // 35
+        const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; 
 
         let savedData = JSON.parse(localStorage.getItem('stream_stamps_aug')) || { stamps: [], history: [] };
 
-        // 5枚のスタンプ台と、その上のスタンプを配置
         function renderCards() {
             const wrapper = document.getElementById('cards-wrapper');
             wrapper.innerHTML = '';
 
-            // 5枚のカードをループで生成
+            // CARD_IMAGES が images.js から正しく読み込めているか安全弁を用意
+            const cardBg = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.cardBase : 'cardhaikei.png';
+            const stampSrcMap = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
+            const positions = (typeof STAMP_POSITIONS !== 'undefined') ? STAMP_POSITIONS : [];
+
             for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
                 const card = document.createElement('div');
                 card.className = 'card-base';
-                card.style.backgroundImage = `url('${CARD_IMAGES.cardBase}')`;
+                card.style.backgroundImage = `url('${cardBg}')`;
 
-                // 各カードに7つのスタンプ穴の位置を割り当てる
                 for (let stampIdx = 0; stampIdx < STAMPS_PER_CARD; stampIdx++) {
-                    const globalIdx = (cardIdx * STAMPS_PER_CARD) + stampIdx; // 全体での通算本数 (0〜34)
+                    const globalIdx = (cardIdx * STAMPS_PER_CARD) + stampIdx;
 
-                    // すでにこのマスにスタンプが押されている場合
                     if (savedData.stamps[globalIdx]) {
                         const img = document.createElement('img');
-                        img.src = CARD_IMAGES.stamps[savedData.stamps[globalIdx]];
+                        img.src = stampSrcMap[savedData.stamps[globalIdx]];
                         img.className = 'stamp-element';
                         
-                        // images.js で設定した％座標を適用
-                        const pos = STAMP_POSITIONS[stampIdx];
+                        const pos = positions[stampIdx];
                         if (pos) {
                             img.style.top = pos.top;
                             img.style.left = pos.left;
@@ -58,30 +64,30 @@
             document.getElementById('stamp-count').innerText = savedData.stamps.length;
         }
 
-        // 獲得処理
         function processStamp() {
             const urlParams = new URLSearchParams(window.location.search);
             const streamId = urlParams.get('id');    
             const type = urlParams.get('type');      
+            const isDebug = urlParams.get('debug') === 'true'; // ?debug=true で期間無視
 
             if (!streamId || !type) {
                 renderCards();
                 return;
             }
 
-            // 【期間ガード】2026年の8/1〜8/31以外は弾く
+            // 【期間ガード】2026年の8/1〜8/31以外は弾く（debug=true の場合はスルー）
             const now = new Date();
             const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1; // 0始まりなので+1
+            const currentMonth = now.getMonth() + 1; 
             
-            if (currentYear !== 2026 || currentMonth !== 8) {
+            if (!isDebug && (currentYear !== 2026 || currentMonth !== 8)) {
                 showAlert('このスタンプカードは8月（8/1〜8/31）の期間外は使用できません。', 'error');
                 renderCards();
                 return;
             }
 
             if (savedData.stamps.length >= MAX_STAMPS) {
-                showAlert('すべてのスタンプカードが満タンになりました！ありがとう！', 'error');
+                showAlert('すべてのスタンプカードが満タンになりました！', 'error');
                 renderCards();
                 return;
             }
@@ -92,7 +98,6 @@
                 return;
             }
 
-            // データを追加
             savedData.stamps.push(type);
             savedData.history.push(streamId);
             localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
@@ -111,9 +116,29 @@
             alertBox.innerText = text;
             alertBox.className = `alert-msg ${className}`;
             alertBox.style.display = 'block';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
         }
 
-        processStamp();
+        // 🔧 デバッグ用ボタンの関数
+         Zion
+        function addDebugStamp(type) {
+            if (savedData.stamps.length >= MAX_STAMPS) return;
+            savedData.stamps.push(type);
+            savedData.history.push('debug_' + Date.now());
+            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
+            renderCards();
+        }
+
+        function resetStamps() {
+            savedData = { stamps: [], history: [] };
+            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
+            renderCards();
+        }
+
+        // ページ読み込み完了時に実行
+        window.addEventListener('DOMContentLoaded', () => {
+            processStamp();
+        });
     </script>
 </body>
 </html>
