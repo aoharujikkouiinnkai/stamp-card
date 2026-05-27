@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配信リスナー限定スタンプカード</title>
+    <script src="images.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>✨ 配信限定スタンプカード ✨</h1>
+    <div class="info">現在のスタンプ：<span id="stamp-count">0</span> / 12</div>
+
+    <div class="card-container" id="card-container">
+        <div class="stamp-grid" id="stamp-grid">
+            </div>
+    </div>
+
+    <div id="alert-msg" class="alert-msg"></div>
+
+    <script>
+        const MAX_STAMPS = 12;
+
+        // 背景画像をCSS変数経由でセット
+        document.getElementById('card-container').style.setProperty('--bg-image', `url('${CARD_IMAGES.background}')`);
+
+        // ローカルストレージからデータ読み込み
+        let savedData = JSON.parse(localStorage.getItem('stream_stamps')) || { stamps: [], history: [] };
+
+        // 画面へのスタンプ描画処理
+        function renderCard() {
+            const grid = document.getElementById('stamp-grid');
+            grid.innerHTML = ''; 
+            
+            for (let i = 0; i < MAX_STAMPS; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'stamp-slot';
+                
+                if (savedData.stamps[i]) {
+                    const img = document.createElement('img');
+                    img.src = CARD_IMAGES.stamps[savedData.stamps[i]]; // images.js から取得
+                    img.className = 'stamp-image';
+                    slot.appendChild(img);
+                }
+                grid.appendChild(slot);
+            }
+            document.getElementById('stamp-count').innerText = savedData.stamps.length;
+        }
+
+        // URL判定とスタンプ追加
+        function processStamp() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamId = urlParams.get('id');    
+            const type = urlParams.get('type');      
+
+            // パラメータがない場合は現在のカードを表示して終了
+            if (!streamId || !type) {
+                renderCard();
+                return;
+            }
+
+            // エラーチェック
+            if (savedData.stamps.length >= MAX_STAMPS) {
+                showAlert('スタンプカードが満タンです！', 'error');
+                renderCard();
+                return;
+            }
+
+            if (savedData.history.includes(streamId)) {
+                showAlert('この配信のスタンプはすでに獲得済みです！', 'error');
+                renderCard();
+                return;
+            }
+
+            // スタンプデータを保存
+            savedData.stamps.push(type);
+            savedData.history.push(streamId);
+            localStorage.setItem('stream_stamps', JSON.stringify(savedData));
+
+            // 成功メッセージ表示とカード再描画
+            showAlert(`${type === 'live' ? '🔥リアタイ特典！' : '🎬アーカイブ'} スタンプをゲットしました！`, 'success');
+            renderCard();
+
+            // 1.5秒後にURLからパラメータを消してスッキリさせる（二重リロード防止）
+            setTimeout(() => {
+                const cleanURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanURL);
+            }, 1500);
+        }
+
+        function showAlert(text, className) {
+            const alertBox = document.getElementById('alert-msg');
+            alertBox.innerText = text;
+            alertBox.className = `alert-msg ${className}`;
+            alertBox.style.display = 'block';
+        }
+
+        // 実行
+        processStamp();
+    </script>
+</body>
+</html>
