@@ -3,86 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>配信リスナー限定スタンプカード</title>
+    <title>8月限定！配信スタンプカード</title>
     <script src="images.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>✨ 配信限定スタンプカード ✨</h1>
-    <div class="info">現在のスタンプ：<span id="stamp-count">0</span> / 12</div>
+    <h1>✨ 8月限定スタンプラリー ✨</h1>
+    <div class="info">現在のスタンプ：<span id="stamp-count">0</span> / 35</div>
 
-    <div class="card-container" id="card-container">
-        <div class="stamp-grid" id="stamp-grid">
-            </div>
-    </div>
+    <div class="cards-wrapper" id="cards-wrapper"></div>
 
     <div id="alert-msg" class="alert-msg"></div>
 
     <script>
-        const MAX_STAMPS = 12;
+        const STAMPS_PER_CARD = 7;
+        const TOTAL_CARDS = 5;
+        const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; // 35
 
-        // 背景画像をCSS変数経由でセット
-        document.getElementById('card-container').style.setProperty('--bg-image', `url('${CARD_IMAGES.background}')`);
+        let savedData = JSON.parse(localStorage.getItem('stream_stamps_aug')) || { stamps: [], history: [] };
 
-        // ローカルストレージからデータ読み込み
-        let savedData = JSON.parse(localStorage.getItem('stream_stamps')) || { stamps: [], history: [] };
+        // 5枚のスタンプ台と、その上のスタンプを配置
+        function renderCards() {
+            const wrapper = document.getElementById('cards-wrapper');
+            wrapper.innerHTML = '';
 
-        // 画面へのスタンプ描画処理
-        function renderCard() {
-            const grid = document.getElementById('stamp-grid');
-            grid.innerHTML = ''; 
-            
-            for (let i = 0; i < MAX_STAMPS; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'stamp-slot';
-                
-                if (savedData.stamps[i]) {
-                    const img = document.createElement('img');
-                    img.src = CARD_IMAGES.stamps[savedData.stamps[i]]; // images.js から取得
-                    img.className = 'stamp-image';
-                    slot.appendChild(img);
+            // 5枚のカードをループで生成
+            for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
+                const card = document.createElement('div');
+                card.className = 'card-base';
+                card.style.backgroundImage = `url('${CARD_IMAGES.cardBase}')`;
+
+                // 各カードに7つのスタンプ穴の位置を割り当てる
+                for (let stampIdx = 0; stampIdx < STAMPS_PER_CARD; stampIdx++) {
+                    const globalIdx = (cardIdx * STAMPS_PER_CARD) + stampIdx; // 全体での通算本数 (0〜34)
+
+                    // すでにこのマスにスタンプが押されている場合
+                    if (savedData.stamps[globalIdx]) {
+                        const img = document.createElement('img');
+                        img.src = CARD_IMAGES.stamps[savedData.stamps[globalIdx]];
+                        img.className = 'stamp-element';
+                        
+                        // images.js で設定した％座標を適用
+                        const pos = STAMP_POSITIONS[stampIdx];
+                        if (pos) {
+                            img.style.top = pos.top;
+                            img.style.left = pos.left;
+                        }
+                        card.appendChild(img);
+                    }
                 }
-                grid.appendChild(slot);
+                wrapper.appendChild(card);
             }
             document.getElementById('stamp-count').innerText = savedData.stamps.length;
         }
 
-        // URL判定とスタンプ追加
+        // 獲得処理
         function processStamp() {
             const urlParams = new URLSearchParams(window.location.search);
             const streamId = urlParams.get('id');    
             const type = urlParams.get('type');      
 
-            // パラメータがない場合は現在のカードを表示して終了
             if (!streamId || !type) {
-                renderCard();
+                renderCards();
                 return;
             }
 
-            // エラーチェック
+            // 【期間ガード】2026年の8/1〜8/31以外は弾く
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // 0始まりなので+1
+            
+            if (currentYear !== 2026 || currentMonth !== 8) {
+                showAlert('このスタンプカードは8月（8/1〜8/31）の期間外は使用できません。', 'error');
+                renderCards();
+                return;
+            }
+
             if (savedData.stamps.length >= MAX_STAMPS) {
-                showAlert('スタンプカードが満タンです！', 'error');
-                renderCard();
+                showAlert('すべてのスタンプカードが満タンになりました！ありがとう！', 'error');
+                renderCards();
                 return;
             }
 
             if (savedData.history.includes(streamId)) {
                 showAlert('この配信のスタンプはすでに獲得済みです！', 'error');
-                renderCard();
+                renderCards();
                 return;
             }
 
-            // スタンプデータを保存
+            // データを追加
             savedData.stamps.push(type);
             savedData.history.push(streamId);
-            localStorage.setItem('stream_stamps', JSON.stringify(savedData));
+            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
 
-            // 成功メッセージ表示とカード再描画
-            showAlert(`${type === 'live' ? '🔥リアタイ特典！' : '🎬アーカイブ'} スタンプをゲットしました！`, 'success');
-            renderCard();
+            showAlert(`${type === 'live' ? '🔥リアルタイム視聴！' : '🎬アーカイブ視聴'} スタンプを押しました！`, 'success');
+            renderCards();
 
-            // 1.5秒後にURLからパラメータを消してスッキリさせる（二重リロード防止）
             setTimeout(() => {
                 const cleanURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanURL);
@@ -96,7 +113,6 @@
             alertBox.style.display = 'block';
         }
 
-        // 実行
         processStamp();
     </script>
 </body>
