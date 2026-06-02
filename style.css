@@ -4,48 +4,49 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 15px;
     margin: 0;
 }
 
 h1 { 
-    font-size: 20px; 
+    font-size: 22px; 
     color: #333; 
     margin-bottom: 5px; 
+    text-align: center;
 }
 
 .info { 
-    font-size: 14px; 
+    font-size: 15px; 
     color: #666; 
     margin-bottom: 20px; 
 }
 
-/* 全体の外枠スクロールエリア */
+/* 全体の外枠スクロールエリア：画面幅100%に追従 */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* カードとカードの間の隙間 */
-    width: 340px;
+    gap: 25px;
+    width: 100%;
+    max-width: 500px; /* パソコンで見た時に大きくなりすぎないストッパー */
+    box-sizing: border-box;
+    padding: 0 5px;
 }
 
-/* ★スタンプ台（基盤）1枚の設定：2048x1536 (4:3) に合わせて最適化 */
+/* ★スタンプ台：横幅100%にし、4:3（1536:2048）の比率を完全に維持 */
 .card-base {
     position: relative;
-    width: 340px;
-    height: 255px; /* 340px × (1536/2048) = 255px で縦横比を完全に維持 */
-    background-size: contain; /* 画像が切れないように全体を表示 */
+    width: 100%;
+    aspect-ratio: 4 / 3; /* これで縦幅は自動計算されます */
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    border-radius: 10px; /* 画像の角丸に合わせて調整してください */
-    overflow: hidden;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));
 }
 
-/* 押されるスタンプの共通設定（絶対配置） */
+/* 押されるスタンプの共通設定 */
 .stamp-element {
     position: absolute;
-    width: 40px;  /* 255pxの高さに合わせてスタンプサイズを少し小さめに調整 */
-    height: 40px; 
+    /* 横幅・縦幅は images.js の stampSizePercent から動的に設定されるため空欄 */
     object-fit: contain;
     transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -63,8 +64,10 @@ h1 {
     font-size: 14px;
     font-weight: bold;
     display: none;
-    width: 310px;
+    width: 100%;
+    max-width: 490px;
     text-align: center;
+    box-sizing: border-box;
 }
 .success { background-color: #d4edda; color: #155724; }
 .error { background-color: #f8d7da; color: #721c24; }
