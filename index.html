@@ -33,9 +33,12 @@
             const wrapper = document.getElementById('cards-wrapper');
             wrapper.innerHTML = '';
 
-            const cardBg = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.cardBase : 'cardhaikei.png';
-            const stampSrcMap = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
-            const positions = (typeof STAMP_POSITIONS !== 'undefined') ? STAMP_POSITIONS : [];
+            // images.js の安全な読み込みチェック
+            const hasConfig = (typeof CONFIG !== 'undefined');
+            const cardBg = hasConfig ? CONFIG.images.cardBase : 'cardhaikei.png';
+            const stampSrcMap = hasConfig ? CONFIG.images.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
+            const stampSize = hasConfig ? CONFIG.stampSizePercent : '15%';
+            const positions = hasConfig ? CONFIG.stampPositions : [];
 
             for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
                 const card = document.createElement('div');
@@ -49,6 +52,10 @@
                         const img = document.createElement('img');
                         img.src = stampSrcMap[savedData.stamps[globalIdx]];
                         img.className = 'stamp-element';
+                        
+                        // 動的にサイズを設定（カードの大きさに比例して縮細されます）
+                        img.style.width = stampSize;
+                        img.style.height = stampSize;
                         
                         const pos = positions[stampIdx];
                         if (pos) {
@@ -117,7 +124,6 @@
             setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
         }
 
-        // 🔧 デバッグ用ボタンの関数（紛れ込んでいた文字を削除しました）
         function addDebugStamp(type) {
             if (savedData.stamps.length >= MAX_STAMPS) return;
             savedData.stamps.push(type);
@@ -133,6 +139,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            renderCards(); // 初期描画を確実に行う
             processStamp();
         });
     </script>
