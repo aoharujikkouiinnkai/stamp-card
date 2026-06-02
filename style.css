@@ -21,7 +21,7 @@ h1 {
     margin-bottom: 20px; 
 }
 
-/* 全体の外枠スクロールエリア：画面幅100%に追従 */
+/* 全体の外枠スクロールエリア */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
@@ -32,28 +32,29 @@ h1 {
     padding: 0 5px;
 }
 
-/* スタンプ台：横幅100%にし、4:3の比率を完全に維持 */
-.card-base {
+/* ★土台カードとスタンプを包むコンテナ */
+.card-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+}
+
+/* ★土台の画像：横幅100%で表示し、縦幅は画像本来の比率で自動決定 */
+.card-bg {
+    width: 100%;
+    height: auto;
+    display: block;
     filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));
 }
 
-/* 押されるスタンプの設定 */
+/* ★押されるスタンプの設定 */
 .stamp-element {
     position: absolute;
     
-    /* 🔴【サイズ調整エリア】カードの横幅に対してスタンプを何％の大きさにするか */
-    /* 計算した％数値をここに入力してください（例: 14.65%） */
+    /* 🔴【サイズ調整エリア】cardhaikei.png の横幅に対して何％の大きさにするか */
+    /* 計算した数値をここに入力すれば、画像の横幅を基準にピッタリ縮尺されます */
     width: 14.65%;  
     
-    /* 縦幅を auto にすることで画像の本来の比率が維持され、縮まなくなります */
-    height: auto; 
-    
+    height: auto; /* 縦幅はスタンプ画像本来の比率を維持して自動計算（縮み防止） */
     object-fit: contain;
     transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
