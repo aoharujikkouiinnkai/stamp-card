@@ -45,8 +45,8 @@
             wrapper.innerHTML = '';
 
             // images.js から純粋に画像パスのみを取得
-            const cardBg = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'cardhaikei.png';
-            const stampSrcMap = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
+            const cardBg = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'images/cardhaikei.png';
+            const stampSrcMap = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.stamps : { live: 'images/stamp_live.png', archive: 'images/stamp_archive.png' };
 
             for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
                 const card = document.createElement('div');
