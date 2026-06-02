@@ -8,33 +8,44 @@ body {
     margin: 0;
 }
 
-h1 { font-size: 20px; color: #333; margin-bottom: 5px; }
-.info { font-size: 14px; color: #666; margin-bottom: 20px; }
+h1 { 
+    font-size: 20px; 
+    color: #333; 
+    margin-bottom: 5px; 
+}
+
+.info { 
+    font-size: 14px; 
+    color: #666; 
+    margin-bottom: 20px; 
+}
 
 /* 全体の外枠スクロールエリア */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 30px; /* カードとカードの間の隙間 */
+    gap: 20px; /* カードとカードの間の隙間 */
     width: 340px;
 }
 
-/* スタンプ台（基盤）1枚の設定 */
+/* ★スタンプ台（基盤）1枚の設定：2048x1536 (4:3) に合わせて最適化 */
 .card-base {
     position: relative;
     width: 340px;
-    height: 500px; /* cardhaikei.pngの縦横比に合わせて調整してください */
-    background-size: cover;
+    height: 255px; /* 340px × (1536/2048) = 255px で縦横比を完全に維持 */
+    background-size: contain; /* 画像が切れないように全体を表示 */
+    background-repeat: no-repeat;
     background-position: center;
-    border-radius: 15px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    border-radius: 10px; /* 画像の角丸に合わせて調整してください */
+    overflow: hidden;
 }
 
 /* 押されるスタンプの共通設定（絶対配置） */
 .stamp-element {
     position: absolute;
-    width: 50px;  /* スタンプの横幅（穴のサイズに合わせて調整） */
-    height: 50px; /* スタンプの縦幅（穴のサイズに合わせて調整） */
+    width: 40px;  /* 255pxの高さに合わせてスタンプサイズを少し小さめに調整 */
+    height: 40px; 
     object-fit: contain;
     transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
