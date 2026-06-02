@@ -27,18 +27,26 @@
         const TOTAL_CARDS = 5;
         const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; 
 
+        // ★スタンプの座標設定（7つの穴の中心位置を％で指定）
+        const STAMP_POSITIONS = [
+            { top: '20%', left: '15%' }, // 1個目の穴
+            { top: '35%', left: '45%' }, // 2個目の穴
+            { top: '50%', left: '75%' }, // 3個目の穴
+            { top: '65%', left: '30%' }, // 4個目の穴
+            { top: '72%', left: '60%' }, // 5個目の穴
+            { top: '80%', left: '15%' }, // 6個目の穴
+            { top: '90%', left: '50%' }  // 7個目の穴
+        ];
+
         let savedData = JSON.parse(localStorage.getItem('stream_stamps_aug')) || { stamps: [], history: [] };
 
         function renderCards() {
             const wrapper = document.getElementById('cards-wrapper');
             wrapper.innerHTML = '';
 
-            // images.js の安全な読み込みチェック
-            const hasConfig = (typeof CONFIG !== 'undefined');
-            const cardBg = hasConfig ? CONFIG.images.cardBase : 'cardhaikei.png';
-            const stampSrcMap = hasConfig ? CONFIG.images.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
-            const stampSize = hasConfig ? CONFIG.stampSizePercent : '15%';
-            const positions = hasConfig ? CONFIG.stampPositions : [];
+            // images.js から純粋に画像パスのみを取得
+            const cardBg = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'cardhaikei.png';
+            const stampSrcMap = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
 
             for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
                 const card = document.createElement('div');
@@ -53,11 +61,7 @@
                         img.src = stampSrcMap[savedData.stamps[globalIdx]];
                         img.className = 'stamp-element';
                         
-                        // 動的にサイズを設定（カードの大きさに比例して縮細されます）
-                        img.style.width = stampSize;
-                        img.style.height = stampSize;
-                        
-                        const pos = positions[stampIdx];
+                        const pos = STAMP_POSITIONS[stampIdx];
                         if (pos) {
                             img.style.top = pos.top;
                             img.style.left = pos.left;
@@ -139,7 +143,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            renderCards(); // 初期描画を確実に行う
+            renderCards();
             processStamp();
         });
     </script>
