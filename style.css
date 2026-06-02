@@ -27,26 +27,29 @@ h1 {
     flex-direction: column;
     gap: 25px;
     width: 100%;
-    max-width: 500px; /* パソコンで見た時に大きくなりすぎないストッパー */
+    max-width: 500px; /* PCで見きれないためのストッパー */
     box-sizing: border-box;
     padding: 0 5px;
 }
 
-/* ★スタンプ台：横幅100%にし、4:3（1536:2048）の比率を完全に維持 */
+/* スタンプ台：横幅100%にし、4:3の比率を完全に維持 */
 .card-base {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3; /* これで縦幅は自動計算されます */
+    aspect-ratio: 4 / 3;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));
 }
 
-/* 押されるスタンプの共通設定 */
+/* 押されるスタンプの設定 */
 .stamp-element {
     position: absolute;
-    /* 横幅・縦幅は images.js の stampSizePercent から動的に設定されるため空欄 */
+    /* 🔴【サイズ調整エリア】カードの横幅に対してスタンプを何％の大きさにするか */
+    /* 穴のサイズに合わせて、ここの％数値を書き換えるだけで一発で調整できます */
+    width: 16%;  
+    height: 16%; 
     object-fit: contain;
     transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
