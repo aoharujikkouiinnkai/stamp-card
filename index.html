@@ -33,7 +33,6 @@
             const wrapper = document.getElementById('cards-wrapper');
             wrapper.innerHTML = '';
 
-            // CARD_IMAGES が images.js から正しく読み込めているか安全弁を用意
             const cardBg = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.cardBase : 'cardhaikei.png';
             const stampSrcMap = (typeof CARD_IMAGES !== 'undefined') ? CARD_IMAGES.stamps : { live: 'stamp_live.png', archive: 'stamp_archive.png' };
             const positions = (typeof STAMP_POSITIONS !== 'undefined') ? STAMP_POSITIONS : [];
@@ -68,14 +67,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const streamId = urlParams.get('id');    
             const type = urlParams.get('type');      
-            const isDebug = urlParams.get('debug') === 'true'; // ?debug=true で期間無視
+            const isDebug = urlParams.get('debug') === 'true'; 
 
             if (!streamId || !type) {
                 renderCards();
                 return;
             }
 
-            // 【期間ガード】2026年の8/1〜8/31以外は弾く（debug=true の場合はスルー）
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth() + 1; 
@@ -119,8 +117,7 @@
             setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
         }
 
-        // 🔧 デバッグ用ボタンの関数
-         Zion
+        // 🔧 デバッグ用ボタンの関数（紛れ込んでいた文字を削除しました）
         function addDebugStamp(type) {
             if (savedData.stamps.length >= MAX_STAMPS) return;
             savedData.stamps.push(type);
@@ -135,7 +132,6 @@
             renderCards();
         }
 
-        // ページ読み込み完了時に実行
         window.addEventListener('DOMContentLoaded', () => {
             processStamp();
         });
