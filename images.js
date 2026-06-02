@@ -1,26 +1,26 @@
 // images.js
-const CARD_IMAGES = {
-    // 全体の背景（もしあれば）
-    background: 'bg.png', 
+const CONFIG = {
+    // 🔴【超重要】カードの横幅に対して、スタンプの大きさを何％にするか
+    // 穴の大きさに合わせて、10% 〜 25% の間で自由に数値を調整してください
+    stampSizePercent: '16%', 
 
-    // スタンプ台のジグザグな基盤（7つの穴があるテンプレート画像）
-    cardBase: 'cardhaikei.png', 
+    // 使用する画像ファイルの一覧（画像が増えたらここに追記していきます）
+    images: {
+        cardBase: 'cardhaikei.png',      // スタンプ台の基盤（2048x1536）
+        stamps: {
+            live: 'stamp_live.png',       // リアタイ用スタンプ
+            archive: 'stamp_archive.png'  // アーカイブ用スタンプ
+        }
+    },
 
-    // スタンプ画像の種類
-    stamps: {
-        live: 'stamp_live.png',
-        archive: 'stamp_archive.png'
-    }
+    // 1枚のカード内にある7つの穴の座標（中心点の位置を % で指定）
+    stampPositions: [
+        { top: '20%', left: '15%' }, // 1個目の穴
+        { top: '35%', left: '45%' }, // 2個目の穴
+        { top: '50%', left: '75%' }, // 3個目の穴
+        { top: '65%', left: '30%' }, // 4個目の穴
+        { top: '72%', left: '60%' }, // 5個目の穴
+        { top: '80%', left: '15%' }, // 6個目の穴
+        { top: '90%', left: '50%' }  // 7個目の穴
+    ]
 };
-
-// ★スタンプの座標設定（試行錯誤をなくすための設定）
-// 1枚の「cardhaikei.png」の中にある7つの穴の「上からの位置(top)」と「左からの位置(left)」を％で指定します。
-const STAMP_POSITIONS = [
-    { top: '20%', left: '15%' }, // 1個目の穴
-    { top: '35%', left: '45%' }, // 2個目の穴（ジグザグに合わせて）
-    { top: '50%', left: '75%' }, // 3個目の穴
-    { top: '65%', left: '30%' }, // 4個目の穴
-    { top: '72%', left: '60%' }, // 5個目の穴
-    { top: '80%', left: '15%' }, // 6個目の穴
-    { top: '90%', left: '50%' }  // 7個目の穴
-];
