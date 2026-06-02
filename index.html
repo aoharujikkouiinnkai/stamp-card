@@ -27,7 +27,7 @@
         const TOTAL_CARDS = 5;
         const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; 
 
-        // ★スタンプの座標設定（7つの穴の中心位置を％で指定）
+        // ★スタンプの座標設定（7つの穴の中心位置を土台画像の縦横に対する％で指定）
         const STAMP_POSITIONS = [
             { top: '20%', left: '15%' }, // 1個目の穴
             { top: '35%', left: '45%' }, // 2個目の穴
@@ -44,15 +44,22 @@
             const wrapper = document.getElementById('cards-wrapper');
             wrapper.innerHTML = '';
 
-            // images.js から純粋に画像パスのみを取得
-            const cardBg = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'images/cardhaikei.png';
+            // images.js から画像パスを取得
+            const cardBgSrc = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'images/cardhaikei.png';
             const stampSrcMap = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.stamps : { live: 'images/stamp_live.png', archive: 'images/stamp_archive.png' };
 
             for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
-                const card = document.createElement('div');
-                card.className = 'card-base';
-                card.style.backgroundImage = `url('${cardBg}')`;
+                // コンテナを作成
+                const container = document.createElement('div');
+                container.className = 'card-container';
 
+                // 土台となる画像（cardhaikei.png）を配置
+                const bgImg = document.createElement('img');
+                bgImg.src = cardBgSrc;
+                bgImg.className = 'card-bg';
+                container.appendChild(bgImg);
+
+                // スタンプをその上に重ねていく
                 for (let stampIdx = 0; stampIdx < STAMPS_PER_CARD; stampIdx++) {
                     const globalIdx = (cardIdx * STAMPS_PER_CARD) + stampIdx;
 
@@ -66,10 +73,10 @@
                             img.style.top = pos.top;
                             img.style.left = pos.left;
                         }
-                        card.appendChild(img);
+                        container.appendChild(img);
                     }
                 }
-                wrapper.appendChild(card);
+                wrapper.appendChild(container);
             }
             document.getElementById('stamp-count').innerText = savedData.stamps.length;
         }
