@@ -1,76 +1,12 @@
-body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f0f2f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-    margin: 0;
-}
-
-h1 { 
-    font-size: 22px; 
-    color: #333; 
-    margin-bottom: 5px; 
-    text-align: center;
-}
-
-.info { 
-    font-size: 15px; 
-    color: #666; 
-    margin-bottom: 20px; 
-}
-
-/* 全体の外枠スクロールエリア：画面幅100%に追従 */
-.cards-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    width: 100%;
-    max-width: 500px; /* PCで見きれないためのストッパー */
-    box-sizing: border-box;
-    padding: 0 5px;
-}
-
-/* スタンプ台：横幅100%にし、4:3の比率を完全に維持 */
-.card-base {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));
-}
-
-/* 押されるスタンプの設定 */
+/* style.css のこの部分を書き換えます */
 .stamp-element {
     position: absolute;
-    /* 🔴【サイズ調整エリア】カードの横幅に対してスタンプを何％の大きさにするか */
-    /* 穴のサイズに合わせて、ここの％数値を書き換えるだけで一発で調整できます */
-    width: 16%;  
-    height: 16%; 
+    
+    /* 👇 ここを上記で計算した％数値に書き換えてください（例: 14.65% など） */
+    width: 14.65%;  
+    height: 14.65%; 
+    
     object-fit: contain;
-    transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
+    transform: translate(-50%, -50%);
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-
-@keyframes bounceIn {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-
-.alert-msg {
-    margin-top: 15px;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    display: none;
-    width: 100%;
-    max-width: 490px;
-    text-align: center;
-    box-sizing: border-box;
-}
-.success { background-color: #d4edda; color: #155724; }
-.error { background-color: #f8d7da; color: #721c24; }
