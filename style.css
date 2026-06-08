@@ -27,8 +27,7 @@ h1 {
     flex-direction: column;
     gap: 25px;
     width: 100%;
-    /* 💡 カードを画面の横方向真ん中に寄せる設定 */
-    align-items: center; 
+    max-width: 500px; /* 💡 上書き前に戻しました（PCで見きれないためのストッパー） */
     box-sizing: border-box;
     padding: 0 5px;
 }
@@ -38,12 +37,12 @@ h1 {
     position: relative;
     width: 100%;
     
-    /* 💡 縦幅を画面内に収めるための上限ストッパー（4:3比率用計算） */
-    /* タイトルや上下の余白（約140px分）を引いた高さ（100vh - 140px）を基準に最大の横幅を制限します */
+    /* 💡 この設定のみを追加・変更しました */
+    /* 1枚の縦幅が画面高さを超えないよう、4:3比率をベースに最大横幅を制限します（上下余白を約140pxと仮定） */
     max-width: calc((100vh - 140px) * 4 / 3); 
 }
 
-/* ★土台の画像：コンテナの横幅いっぱいに広げる */
+/* ★土台の画像：横幅100%で表示し、縦幅は画像本来の比率で自動決定 */
 .card-bg {
     width: 100%;
     height: auto;
@@ -55,10 +54,10 @@ h1 {
 .stamp-element {
     position: absolute;
     
-    /* 💡 cardhaikei.png  */
+    /* 💡 上書き前の 22% に戻しました */
     width: 22%;  
     
-    height: auto; 
+    height: auto; /* 縦幅はスタンプ画像本来の比率を維持して自動計算（縮み防止） */
     object-fit: contain;
     transform: translate(-50%, -50%); /* 画像の中心を座標の基準点にする */
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
