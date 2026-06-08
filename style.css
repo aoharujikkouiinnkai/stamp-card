@@ -55,8 +55,8 @@ h1 {
 .stamp-element {
     position: absolute;
     
-    /* 💡 cardhaikei.png の横幅に対する％（14.65% に調整済み） */
-    width: 14.65%;  
+    /* 💡 cardhaikei.png  */
+    width: 22%;  
     
     height: auto; 
     object-fit: contain;
