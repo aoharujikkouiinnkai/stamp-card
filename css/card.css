@@ -1,32 +1,155 @@
-/* card.css - スタンプカード固有スタイル */
-.card{ position:relative; width:960px; max-width:96vw; height:auto; }
-.card-bg{ width:100%; display:block; border-radius:10px; }
-.stamps-container{ position:absolute; inset:0; pointer-events:none }
-
-/* stamp buttons are absolutely positioned by JS using percentages */
-.stamp{
-  position:absolute;
-  width:72px; height:72px;
-  transform: translate(-50%,-50%);
-  pointer-events:auto;
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-  overflow:hidden;
-  transition: transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s ease, opacity .12s ease;
+/* ==========================================================================
+   スタンプカードセクション全体
+   ========================================================================== */
+.stamp-section {
+    padding: 100px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
-.stamp img{ width:84%; height:84%; object-fit:contain }
 
-.stamp.not-acquired{ opacity:0.7; filter:grayscale(70%); }
-.stamp.acquired{ transform: translate(-50%,-50%) scale(1.08); box-shadow: 0 12px 28px rgba(0,0,0,0.18); }
-.stamp:active{ transform: translate(-50%,-50%) scale(0.98) }
+.section-title-area {
+    text-align: center;
+    margin-bottom: 50px;
+}
 
-/* weekday label under each stamp (optional) */
-.weekday-label{ position:absolute; transform: translate(-50%, -10px); font-size:12px; color:var(--muted); pointer-events:none }
+.section-title {
+    font-size: 2.2rem;
+    color: var(--color-primary-blue);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
 
-/* helper for positions in CSS fallback (if JS not available) */
-.card.fallback .stamp[data-pos="0"]{ left:16.2%; top:75.1% }
-.card.fallback .stamp[data-pos="1"]{ left:28.4%; top:33.4% }
-/* ... continue if needed ... */
+.section-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-sub);
+    margin-top: 5px;
+}
+
+/* 5枚のカードを並べるコンテナ */
+.cards-container {
+    width: 100%;
+    max-width: 1200px; /* PCでの見やすさを考慮した最大幅 */
+    display: flex;
+    flex-direction: column;
+    gap: 60px; /* カードとカードの間隔 */
+}
+
+/* ==========================================================================
+   スタンプカード本体（16:9維持の魔法）
+   ========================================================================== */
+.stamp-card-wrapper {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.stamp-card-inner {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 1920 / 1080; /* これにより16:9を強制維持 */
+    background: #e2e8f0; /* 画像読み込み前のダミーグレー */
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+}
+
+.card-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ==========================================================================
+   スタンプスロット（絶対座標マッピング）
+   ========================================================================== */
+.stamp-slot {
+    position: absolute;
+    width: 7%; /* 1920に対して適正なスタンプサイズに自動縮小（調整可） */
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%); /* 座標の中心点を合わせる */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* 日付バッジ */
+.date-badge {
+    position: absolute;
+    top: -25px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--color-text-main);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* スタンプの押し領域 */
+.stamp-trigger {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.stamp-trigger:hover {
+    transform: scale(1.1);
+}
+
+/* スタンプ画像 */
+.stamp-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 取得済み状態 */
+.stamp-icon.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 未取得状態のうっすらしたガイド円 */
+.stamp-placeholder {
+    width: 80%;
+    height: 80%;
+    border: 2px dashed rgba(0, 79, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.3s;
+}
+
+.stamp-trigger:hover .stamp-placeholder {
+    background: rgba(0, 122, 255, 0.1);
+    border-color: var(--color-primary-blue);
+}
+
+/* カード下の情報エリア */
+.card-footer-info {
+    text-align: right;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--color-text-sub);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
