@@ -1,0 +1,19 @@
+{
+  "eventYear": 2026,
+  "timezone": "Asia/Tokyo",
+  "realtimeWindow": { "startHour": 21, "endHour": 23, "endMinute": 59 },
+  "cardImage": "images/cardhaikei.png",
+  "cardSize": { "width": 1920, "height": 1080 },
+  "stampPositions": [
+    {"x":311,"y":811,"weekday":"Sat"},
+    {"x":544,"y":361,"weekday":"Sun"},
+    {"x":756,"y":829,"weekday":"Mon"},
+    {"x":978,"y":366,"weekday":"Tue"},
+    {"x":1188,"y":815,"weekday":"Wed"},
+    {"x":1399,"y":391,"weekday":"Thu"},
+    {"x":1621,"y":817,"weekday":"Fri"}
+  ],
+  "imagePathPrefix": "images/",
+  "voicePathPrefix": "voices/",
+  "soundPathPrefix": "sounds/"
+}

@@ -1,70 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>アオハル8月スタンプラリー</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/animation.css">
-    <link rel="stylesheet" href="css/responsive.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>アオハル 8月スタンプラリー（デモ）</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <header class="site-header">
+    <div class="login-area">
+      <button id="btn-login">Googleログイン</button>
+      <button id="btn-logout" style="display:none">ログアウト</button>
+    </div>
+    <h1 class="site-title">アオハル 8月スタンプラリー（デモ）</h1>
+  </header>
 
-    <div class="sky-background"></div>
+  <main>
+    <section class="hero">
+      <div class="characters">
+        <img src="images/AoharuRMI.png" alt="RMI" class="char rmi">
+        <img src="images/AoharuSNO.png" alt="SNO" class="char sno">
+        <img src="images/AoharuJAN.png" alt="JAN" class="char jan">
+        <img src="images/AoharuNNS.png" alt="NNS" class="char nns">
+      </div>
+      <p class="catch">青空・学校・夏。アオハルな時間を共有しよう。</p>
+    </section>
 
-    <header class="global-header header-glass">
-        <div class="header-logo">アオハル実行委員会</div>
-        <button id="google-login-btn" class="btn-login">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
-            <span>Googleでログイン</span>
-        </button>
-    </header>
+    <section class="card-section">
+      <h2>スタンプカード</h2>
+      <div id="card" class="card">
+        <img src="images/cardhaikei.png" alt="card background" class="card-bg">
+        <div id="stamps-container" class="stamps-container"></div>
+      </div>
+    </section>
 
-    <main class="main-container">
-        <section class="hero-section">
-            
-            <div class="member-wrapper member-rmi position-low" onclick="location.href='profile.html'">
-                <div class="stand-image-placeholder">
-                    <span class="member-name-tag">RMI</span>
-                    </div>
-            </div>
+    <section id="debug-panel" class="debug" style="display:none">
+      <h3>DEBUG</h3>
+      <button id="btn-sync">同期（Local → Firestore）</button>
+      <button id="btn-clear-local">LocalStorage 初期化</button>
+    </section>
+  </main>
 
-            <div class="member-wrapper member-sno position-high" onclick="location.href='profile.html'">
-                <div class="stand-image-placeholder">
-                    <span class="member-name-tag">SNO</span>
-                    </div>
-            </div>
+  <footer>
+    <p>デモ実装 — Firebase 設定は firebase/firebaseConfig.js を差し替えてください。</p>
+  </footer>
 
-            <div class="center-content-card glass-panel">
-                <h1 class="group-title">アオハル実行委員会</h1>
-                <p class="catch-copy">「僕たちの夏は、きっと終わらない。」</p>
-                <div class="divider"></div>
-                <p class="description">
-                    8月限定の特別配信スタンプラリーへようこそ。<br>
-                    リアルタイムで配信を視聴して、限定スタンプと特別なボイスを集めよう。
-                </p>
-                <a href="#stamp-section" class="btn-primary">スタンプカードを見る</a>
-            </div>
-
-            <div class="member-wrapper member-jan position-high" onclick="location.href='profile.html'">
-                <div class="stand-image-placeholder">
-                    <span class="member-name-tag">JAN</span>
-                    </div>
-            </div>
-
-            <div class="member-wrapper member-nns position-low" onclick="location.href='profile.html'">
-                <div class="stand-image-placeholder">
-                    <span class="member-name-tag">NNS</span>
-                    </div>
-            </div>
-
-        </section>
-
-        <section id="stamp-section" class="stamp-section">
-            </section>
-    </main>
-
+  <script src="js/utils.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/stampManager.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

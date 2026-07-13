@@ -1,0 +1,8 @@
+{
+  "stamps": [
+    {"id":"2026-08-01-R1","date":"2026-08-01","type":"real","stampImage":"stamp_R1.png","voice":"voice_R1.wav","title":"歌ってみた #1","status":"archive"},
+    {"id":"2026-08-02-R2","date":"2026-08-02","type":"real","stampImage":"stamp_R2.png","voice":"voice_R2.wav","title":"歌ってみた #2","status":"archive"},
+    {"id":"2026-08-03-R3","date":"2026-08-03","type":"real","stampImage":"stamp_R3.png","voice":"voice_R3.wav","title":"歌ってみた #3","status":"archive"},
+    {"id":"2026-08-11-J1","date":"2026-08-11","type":"real","stampImage":"stamp_J1.png","voice":"voice_J1.wav","title":"スペシャル #A","status":"archive"}
+  ]
+}
