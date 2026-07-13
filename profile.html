@@ -11,93 +11,66 @@
 
     <div class="sky-background"></div>
 
-    <main class="profile-container">
+    <main class="profile-single-container">
         
-        <div class="profile-header">
+        <div class="profile-header-actions">
             <a href="index.html" class="btn-back">← トップページに戻る</a>
-            <h1 class="profile-page-title">Member Profile</h1>
         </div>
 
-        <div class="profile-grid">
+        <div class="profile-single-card glass-panel" id="profile-card-container">
             
-            <div class="profile-card glass-panel member-rmi-card">
-                <div class="profile-avatar-area">
-                    <div class="profile-avatar-placeholder">
-                        <img src="images/AoharuRMI.png" alt="RMI" class="profile-img">
-                    </div>
-                </div>
-                <div class="profile-info-area">
-                    <div class="member-color-badge color-rmi">COLOR</div>
-                    <h2 class="member-profile-name">RMI</h2>
-                    <p class="member-intro">
-                        アオハル実行委員会のリーダー。夏が誰よりも似合う元気いっぱいの男の子。みんなを引っ張る太陽のような存在です！
-                    </p>
-                    <div class="profile-links">
-                        <a href="https://youtube.com/..." target="_blank" class="link-item yt-link">YouTube</a>
-                        <a href="https://x.com/..." target="_blank" class="link-item sns-link">X (Twitter)</a>
-                    </div>
+            <div class="profile-left-stage">
+                <div class="profile-standalone-image-wrapper">
+                    <img id="js-member-img" src="" alt="メンバー立ち絵" class="single-member-img">
                 </div>
             </div>
 
-            <div class="profile-card glass-panel member-sno-card">
-                <div class="profile-avatar-area">
-                    <div class="profile-avatar-placeholder">
-                        <img src="images/AoharuSNO.png" alt="SNO" class="profile-img">
-                    </div>
-                </div>
-                <div class="profile-info-area">
-                    <div class="member-color-badge color-sno">COLOR</div>
-                    <h2 class="member-profile-name">SNO</h2>
-                    <p class="member-intro">
-                        クールでマイペースなアオハルのまとめ役。少し照れ屋だけど、配信への情熱は人一倍。夕方の静かな海が大好き。
+            <div class="profile-right-info">
+                <div id="js-member-color-badge" class="single-color-badge">COLOR</div>
+                <h1 id="js-member-name" class="single-member-name">Loading...</h1>
+                
+                <div class="intro-box">
+                    <p id="js-member-intro" class="single-member-intro">
+                        読み込み中...
                     </p>
-                    <div class="profile-links">
-                        <a href="https://youtube.com/..." target="_blank" class="link-item yt-link">YouTube</a>
-                        <a href="https://x.com/..." target="_blank" class="link-item sns-link">X (Twitter)</a>
-                    </div>
                 </div>
-            </div>
 
-            <div class="profile-card glass-panel member-jan-card">
-                <div class="profile-avatar-area">
-                    <div class="profile-avatar-placeholder">
-                        <img src="images/AoharuJAN.png" alt="JAN" class="profile-img">
-                    </div>
-                </div>
-                <div class="profile-info-area">
-                    <div class="member-color-badge color-jan">COLOR</div>
-                    <h2 class="member-profile-name">JAN</h2>
-                    <p class="member-intro">
-                        いつも笑顔でムードメーカー。おしゃべりが大好きで、リスナーとの距離が一番近い。炭酸飲料とアイスが主食。
-                    </p>
-                    <div class="profile-links">
-                        <a href="https://youtube.com/..." target="_blank" class="link-item yt-link">YouTube</a>
-                        <a href="https://x.com/..." target="_blank" class="link-item sns-link">X (Twitter)</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-card glass-panel member-nns-card">
-                <div class="profile-avatar-area">
-                    <div class="profile-avatar-placeholder">
-                        <img src="images/AoharuNNS.png" alt="NNS" class="profile-img">
-                    </div>
-                </div>
-                <div class="profile-info-area">
-                    <div class="member-color-badge color-nns">COLOR</div>
-                    <h2 class="member-profile-name">NNS</h2>
-                    <p class="member-intro">
-                        おっとりしていて癒やし系な最年少。音楽が大好きで、歌ってみた動画のクオリティには絶対の自信があります。
-                    </p>
-                    <div class="profile-links">
-                        <a href="https://youtube.com/..." target="_blank" class="link-item yt-link">YouTube</a>
-                        <a href="https://x.com/..." target="_blank" class="link-item sns-link">X (Twitter)</a>
-                    </div>
+                <div class="single-profile-links">
+                    <a id="js-yt-link" href="#" target="_blank" class="link-item yt-link">YouTubeチャンネル</a>
+                    <a id="js-sns-link" href="#" target="_blank" class="link-item sns-link">X (Twitter)</a>
                 </div>
             </div>
 
         </div>
     </main>
 
+    <script>
+        // 擬似的なデータ（将来は profiles.json から読み込みます）
+        const memberData = {
+            rmi: { name: "RMI", color: "#007aff", img: "images/AoharuRMI.png", intro: "アオハル実行委員会のリーダー。夏が誰よりも似合う元気いっぱいの男の子。みんなを引っ張る太陽のような存在です！青空のように真っ直ぐな性格。", yt: "https://youtube.com/...", sns: "https://x.com/..." },
+            sno: { name: "SNO", color: "#4fc3f7", img: "images/AoharuSNO.png", intro: "クールでマイペースなアオハルのまとめ役。少し照れ屋だけど、配信への情熱は人一倍。夕方の静かな海と波の音が大好き。", yt: "https://youtube.com/...", sns: "https://x.com/..." },
+            jan: { name: "JAN", color: "#81c784", img: "images/AoharuJAN.png", intro: "いつも笑顔でアオハルのムードメーカー！おしゃべりが大好きで、リスナーとの距離が一番近い。炭酸飲料と夏フェスが生きがい。", yt: "https://youtube.com/...", sns: "https://x.com/..." },
+            nns: { name: "NNS", color: "#ffb1c1", img: "images/AoharuNNS.png", intro: "おっとりしていて癒やし系な最年少。音楽をこよなく愛しており、8月に投稿される『歌ってみた』動画のクオリティには絶対の自信があります。", yt: "https://youtube.com/...", sns: "https://x.com/..." }
+        };
+
+        // URLパラメータ（?member=rmi など）を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const memberKey = urlParams.get('member') || 'rmi'; // 指定がない場合はRMIをデフォルトに
+
+        // 該当メンバーのデータを画面に反映
+        const member = memberData[memberKey];
+        if (member) {
+            document.getElementById('js-member-name').innerText = member.name;
+            document.getElementById('js-member-img').src = member.img;
+            document.getElementById('js-member-img').alt = member.name;
+            document.getElementById('js-member-intro').innerText = member.intro;
+            document.getElementById('js-yt-link').href = member.yt;
+            document.getElementById('js-sns-link').href = member.sns;
+            
+            // 担当色バッジの背景色を動的に変更
+            const badge = document.getElementById('js-member-color-badge');
+            badge.style.backgroundColor = member.color;
+        }
+    </script>
 </body>
 </html>
