@@ -1,0 +1,14 @@
+/* responsive.css - スマホ対応 */
+@media(max-width:720px){
+  .hero-inner{ flex-direction:column; align-items:center }
+  .characters .char{ width:72px }
+  .card{ width:720px }
+  .stamp{ width:56px; height:56px }
+  .group-name{ font-size:20px }
+}
+
+@media(max-width:420px){
+  .characters .char{ width:56px }
+  .card{ width:92vw }
+  .stamp{ width:48px; height:48px }
+}

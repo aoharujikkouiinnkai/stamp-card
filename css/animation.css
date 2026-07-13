@@ -1,0 +1,17 @@
+/* animation.css - 控えめで青春感のあるアニメーション */
+@keyframes pop-in{
+  0%{ transform: scale(.6); opacity:0 }
+  70%{ transform: scale(1.05); opacity:1 }
+  100%{ transform: scale(1); }
+}
+@keyframes shine{
+  0%{ background-position: -120% 0 }
+  100%{ background-position: 220% 0 }
+}
+
+.stamp.acquired{ animation: pop-in .36s cubic-bezier(.2,.9,.3,1) }
+.shine-effect{
+  background: linear-gradient(120deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.0) 100%);
+  background-size: 200% 100%;
+  animation: shine 1.2s linear;
+}
