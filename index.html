@@ -79,12 +79,12 @@
     </main>
 
     <script type="module">
-        // Firebaseの基本機能、Auth（ログイン）、Firestore（DB）の読み込み
+        // Firebaseモジュールの読み込み
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 1. Firebaseの初期化（元の接続情報を反映）
+        // 1. Firebaseの初期化（有効な接続情報を維持）
         const firebaseConfig = {
             apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
             authDomain: "stamp-card-7272f.firebaseapp.com",
@@ -116,16 +116,44 @@
         ];
         const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
 
-        // 📂 【運営用マスタ】配信データマスタ（2026年想定）
+        // 📂 【運営用マスタ】配信データマスタ（31日分フル対応版）
         const mockStampsMaster = {
-            "stream_aoharu_01": { day: 1, targetDate: "2026-08-01", type: "R1" },
-            "stream_aoharu_02": { day: 2, targetDate: "2026-08-02", type: "S1" },
-            "stream_aoharu_03": { day: 3, targetDate: "2026-08-03", type: "JAN1" },
-            "stream_aoharu_04": { day: 4, targetDate: "2026-08-04", type: "N1" }
+            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01", type: "R1" },
+            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02", type: "S1" },
+            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03", type: "J1" },
+            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04", type: "N1" },
+            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05", type: "R2" },
+            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06", type: "S2" },
+            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07", type: "J2" },
+            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08", type: "N2" },
+            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", type: "R3" },
+            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10", type: "S3" },
+            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11", type: "J3" },
+            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12", type: "N3" },
+            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13", type: "R1" },
+            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14", type: "S1" },
+            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15", type: "J1" },
+            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16", type: "N1" },
+            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17", type: "R2" },
+            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18", type: "S2" },
+            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19", type: "J2" },
+            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20", type: "N2" },
+            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21", type: "R3" },
+            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22", type: "S3" },
+            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23", type: "J3" },
+            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24", type: "N3" },
+            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25", type: "R1" },
+            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26", type: "S1" },
+            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27", type: "J1" },
+            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28", type: "N1" },
+            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29", type: "R2" },
+            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30", type: "S2" },
+            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31", type: "J2" }
         };
 
-        // 状態管理用オブジェクト（現在適用されているスタンプデータ）
+        // 状態管理用オブジェクト
         let activeUserStamps = {};
+        let isUserDebug = false; // 👑 ログイン中ユーザーのデバッグ権限フラグ
 
         // ==========================================================================
         // 2. 認証（Auth）とデータ同期ロジック
@@ -156,28 +184,27 @@
                     <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
                     <span>ログアウト</span>
                 `;
-                // 🔄 ログイン時は、LocalStorage と Firestore を同期・統合する
+                // LocalStorage と Firestore を同期・統合する
                 await syncLocalStorageAndFirestore(user);
             } else {
                 loginBtn.innerHTML = `
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
                     <span>Googleでログイン</span>
                 `;
-                // 未ログイン時は LocalStorage から読み込む
+                isUserDebug = false; // ログアウト時はデバッグ権限をリセット
                 loadLocalStamps();
             }
         });
 
-        // 未ログイン時：LocalStorageからスタンプ情報を読み込む関数
+        // 未ログイン時：LocalStorageからスタンプ情報を読み込む
         function loadLocalStamps() {
             const localData = localStorage.getItem('aoharu_stamps');
             activeUserStamps = localData ? JSON.parse(localData) : {};
             generateStampCards();
-            // URLパラメータでのスタンプ取得チェックへ
             checkUrlParameterForStamp();
         }
 
-        // 🔐 LocalStorage と Firestore の統合同期（リアタイ優先）
+        // LocalStorage と Firestore の統合同期（リアタイ優先）
         async function syncLocalStorageAndFirestore(user) {
             try {
                 const userRef = doc(db, "users", user.uid);
@@ -185,14 +212,21 @@
                 
                 let firestoreStamps = {};
                 if (userSnap.exists()) {
-                    firestoreStamps = userSnap.data().stamps || {};
+                    const data = userSnap.data();
+                    firestoreStamps = data.stamps || {};
+                    // 🔍 同期前にデバッグ権限をチェック・保持
+                    isUserDebug = data.debug || false; 
+                    if (isUserDebug) {
+                        console.log("🛡️ デバッグ権限が有効なユーザーです。");
+                    }
                 } else {
-                    // 新規ユーザー用の初期ドキュメント作成
+                    // 新規ユーザー用の初期ドキュメント作成（デフォルトで debug: false）
                     await setDoc(userRef, {
                         uid: user.uid,
                         name: user.displayName,
                         email: user.email,
                         createdAt: new Date().toISOString(),
+                        debug: false,
                         stamps: {}
                     });
                 }
@@ -225,8 +259,6 @@
 
                 console.log("同期完了 (リアタイ優先統合):", mergedStamps);
                 generateStampCards();
-                
-                // URLパラメータでのスタンプ取得チェックへ
                 checkUrlParameterForStamp();
 
             } catch (error) {
@@ -252,42 +284,54 @@
             }
 
             const stampKey = `day_${stampMaster.day}`;
-            
-            // 既にこの日のスタンプを「リアタイ(active)」で取得済みなら重複エラー
-            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'active') {
-                soundError.play();
-                alert("この日付のスタンプはすでに取得しています！");
-                removeUrlParameter();
-                return;
-            }
-
-            // 🕰️ 時間判定システム
-            const now = new Date();
-            const startTime = new Date(`${stampMaster.targetDate}T21:00:00`);
-            const endTime = new Date(`${stampMaster.targetDate}T23:59:59`);
-            
             let finalStatus = 'none';
 
-            if (now < startTime) {
-                // ① 21:00以前：取得不可
-                soundError.play();
-                alert("配信前のため、まだスタンプは取得できません！");
-                removeUrlParameter();
-                return;
-            } else if (now >= startTime && now <= endTime) {
-                // ② 21:00～23:59：リアタイ取得
-                finalStatus = 'active';
-            } else {
-                // ③ 翌0:00以降：アーカイブ取得
-                finalStatus = 'archive';
-            }
+            // 👑 【特権機能】デバッグユーザー向けの特別処理
+            if (isUserDebug) {
+                // 1. 時間制限チェックを完全にバイパスして強制追加
+                // 2. ダイアログで「リアタイ（active）」か「アーカイブ（archive）」を選択
+                const debugChoice = confirm(
+                    `【デバッグ特権モード】\n8月${stampMaster.day}日のスタンプを強制追加します。\n\n[OK] ➔ リアタイ判定 (active)\n[キャンセル] ➔ アーカイブ判定 (archive)`
+                );
+                
+                finalStatus = debugChoice ? 'active' : 'archive';
 
-            // 既にアーカイブを持っていて、今回もアーカイブ判定なら重複
-            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'archive' && finalStatus === 'archive') {
-                soundError.play();
-                alert("この日付のスタンプはすでに取得しています！");
-                removeUrlParameter();
-                return;
+            } else {
+                // 🕰️ 通常ユーザーの時間判定システム
+                
+                // 既にこの日のスタンプを「リアタイ(active)」で取得済みなら重複エラー
+                if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'active') {
+                    soundError.play();
+                    alert("この日付のスタンプはすでに取得しています！");
+                    removeUrlParameter();
+                    return;
+                }
+
+                const now = new Date();
+                const startTime = new Date(`${stampMaster.targetDate}T21:00:00`);
+                const endTime = new Date(`${stampMaster.targetDate}T23:59:59`);
+                
+                if (now < startTime) {
+                    // ① 21:00以前：取得不可
+                    soundError.play();
+                    alert("配信前のため、まだスタンプは取得できません！");
+                    removeUrlParameter();
+                    return;
+                } else if (now >= startTime && now <= endTime) {
+                    // ② 21:00～23:59：リアタイ取得
+                    finalStatus = 'active';
+                } else {
+                    // ③ 翌0:00以降：アーカイブ取得
+                    finalStatus = 'archive';
+                }
+
+                // 既にアーカイブを持っていて、今回もアーカイブ判定なら重複
+                if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'archive' && finalStatus === 'archive') {
+                    soundError.play();
+                    alert("この日付のスタンプはすでに取得しています！");
+                    removeUrlParameter();
+                    return;
+                }
             }
 
             // スタンプの保存処理へ
@@ -360,7 +404,7 @@
                     const slot = document.createElement('div');
                     slot.className = `stamp-slot slot-day-${day}`;
                     slot.style.left = `${xPositions[index]}%`;
-                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%';
+                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%'; // 途切れバグを修正
 
                     const stampKey = `day_${day}`;
                     const savedStamp = activeUserStamps[stampKey];
