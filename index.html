@@ -44,7 +44,7 @@
                 <p class="catch-copy">「僕たちの夏は、きっと終わらない。」</p>
                 <div class="divider"></div>
                 <p class="description">
-                    8月限定 of 特別配信スタンプラリーへようこそ。<br>
+                    8月限定の特別配信スタンプラリーへようこそ。<br>
                     リアルタイムで配信を視聴して、限定スタンプと特別なボイスを集めよう。
                 </p>
                 <a href="#stamp-section" class="btn-primary">スタンプカードを見る</a>
@@ -117,15 +117,15 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 1. Firebase初期化（実際のConfigに書き換えてください）
+        // 1. Firebase初期化
         const firebaseConfig = {
-          apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
-          authDomain: "stamp-card-7272f.firebaseapp.com",
-          projectId: "stamp-card-7272f",
-          storageBucket: "stamp-card-7272f.firebasestorage.app",
-          messagingSenderId: "440814955407",
-          appId: "1:440814955407:web:490528d0d37465c066f9fa",
-          measurementId: "G-1SQCYTC3G2"
+            apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
+            authDomain: "stamp-card-7272f.firebaseapp.com",
+            projectId: "stamp-card-7272f",
+            storageBucket: "stamp-card-7272f.firebasestorage.app",
+            messagingSenderId: "440814955407",
+            appId: "1:440814955407:web:490528d0d37465c066f9fa",
+            measurementId: "G-1SQCYTC3G2"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -133,12 +133,27 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        /* STREAMING_CHUNK:Initializing state variables and media elements... */
         // 🎵 効果音の定義
         const soundGet = new Audio('sounds/get.mp3');     
         const soundReal = new Audio('sounds/real.mp3');   
         const soundError = new Audio('sounds/error.mp3'); 
         const soundPopup = new Audio('sounds/popup.mp3'); 
+
+        // 🎥 YouTubeのURLからVideo IDと高画質サムネイルURLを自動生成するユーティリティ
+        function getYoutubeId(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function getYoutubeThumbnail(url) {
+            const videoId = getYoutubeId(url);
+            if (videoId) {
+                return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+            }
+            return `https://placehold.co/640x360/1e293b/475569?text=Aoharu+Summer`;
+        }
 
         // 📅 8月のスタンプカード描画用データ構造
         const stampWeeks = [
@@ -153,22 +168,16 @@
         // 👑 12種類のリアタイスタンプマスター配列
         const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
 
-        /* STREAMING_CHUNK:Defining cryptographic stealth engine... */
         // ==========================================================================
         // 🕵️‍♂️ ステルス復号化（難読化）エンジン
         // ==========================================================================
         const Obfuscator = {
-            // 文字列を反転させる
             reverse: (str) => str.split('').reverse().join(''),
-            // 反転したBase64データを安全に復号化
             decode: function(encodedStr) {
                 if (!encodedStr) return {};
                 try {
-                    // 1. 文字列の逆転を戻す
                     const b64 = this.reverse(encodedStr.trim());
-                    // 2. Base64デコード（Unicode対応）
                     const jsonStr = decodeURIComponent(escape(atob(b64)));
-                    // 3. パースしてJSONオブジェクトへ
                     return JSON.parse(jsonStr);
                 } catch (e) {
                     console.error("🔒 隠しデータのデコードに失敗しました。ファイル破損か不正データです:", e);
@@ -178,8 +187,7 @@
         };
 
         // 📂 外部ファイルをフェッチできなかった場合、またはプレビュー環境（フォールバック用）の難読化済みデータ
-        // 元の31日分スケジュールデータを文字列反転＋Base64にエンコードした極秘コードです。
-        const obfuscatedFallback = "==QdxZ2YhdXZyV2YvMHXlh2Y1R2bpNXZyV2YvMHXlh2YlR2bpJXZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2YnR2bpRnZyV2YvMHXlh2YyR2bpNXZyV2YvMHXlh2YzR2bpNXZyV2YvMHXlh2Y0R2bpNXZyV2YvMHXlh2Y1R2bpJnZyV2YvMHXlh2YhR2bpJnZyV2YvMHXlh2YiR2bpJnZyV2YvMHXlh2YjR2bpJnZyV2YvMHXlh2YkR2bpJnZyV2YvMHXlh2YlR2bpJnZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2YnR2bpJnZyV2YvMHXlh2YoR2bpJnZyV2YvMHXlh2YpR2bpRnZyV2YvMHXlh2YwR2bpRnZyV2YvMHXlh2YxR2bpRnZyV2YvMHXlh2YyR2bpRnZyV2YvMHXlh2YzR2bpRnZyV2YvMHXlh2Y0R2bpRnZyV2YvMHXlh2Y1R2bpRnZyV2YvMHXlh2Y2R2bpRnZyV2YvMHXlh2Y3R2bpRnZyV2YvMHXlh2Y4R2bpRnZyV2YvMHXlh2Y5R2bpJnZyV2YvMHXlh2YwR2bpJnZyV2YvMHXlh2YxR2b";
+        const obfuscatedFallback = "==QdxZ2YhdXZyV2YvMHXlh2Y1R2bpNXZyV2YvMHXlh2YlR2bpJXZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2YnR2bpRnZyV2YvMHXlh2YyR2bpNXZyV2YvMHXlh2YzR2bpNXZyV2YvMHXlh2Y0R2bpNXZyV2YvMHXlh2Y1R2bpJnZyV2YvMHXlh2YhR2bpJnZyV2YvMHXlh2YiR2bpJnZyV2YvMHXlh2YjR2bpJnZyV2YvMHXlh2kR2bpJnZyV2YvMHXlh2YlR2bpJnZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2nR2bpJnZyV2YvMHXlh2YoR2bpJnZyV2YvMHXlh2YpR2bpRnZyV2YvMHXlh2YwR2bpRnZyV2YvMHXlh2YxR2bpRnZyV2YvMHXlh2YyR2bpRnZyV2YvMHXlh2YzR2bpRnZyV2YvMHXlh2Y0R2bpRnZyV2YvMHXlh2Y1R2bpRnZyV2YvMHXlh2Y2R2bpRnZyV2YvMHXlh2Y3R2bpRnZyV2YvMHXlh2Y4R2bpRnZyV2YvMHXlh2Y5R2bpJnZyV2YvMHXlh2YwR2bpJnZyV2YvMHXlh2YxR2b";
 
         // 動的にロードされる配信マスターデータ
         let mockStampsMaster = {};
@@ -189,17 +197,15 @@
         let activeStampPool = []; 
         let isUserDebug = false;  
 
-        // 👑 セッション中（ロード後）「スタンプ種類ごと」に一度でもボイスを再生したかを記録する集合（Set）
+        // 👑 セッション中「スタンプ種類ごと」に一度でもボイスを再生したかを記録する集合（Set）
         const playedVoiceTypes = new Set();
-        let currentVoiceAudio = null; // 重複再生を防ぐためのオーディオオブジェクト保持用
+        let currentVoiceAudio = null; 
 
-        /* STREAMING_CHUNK:Loading secret stream schedule asynchronously... */
         // ==========================================================================
         // 📡 外部テキストファイルからスケジュール情報をロードする（ステルス・フェッチ）
         // ==========================================================================
         async function loadSecretStreamData() {
             try {
-                // 1. 本番ディレクトリ「data/schedule_config.txt」からテキストを非同期フェッチ
                 const response = await fetch('data/schedule_config.txt');
                 if (!response.ok) throw new Error("外部テキストファイルが見つかりません。フォールバックを適用します。");
                 
@@ -215,7 +221,6 @@
                 console.warn(error.message);
             }
 
-            // 2. 外部ファイルが無い、またはエラーの場合は、フォールバック用内蔵暗号データを展開
             mockStampsMaster = Obfuscator.decode(obfuscatedFallback);
             console.log("🛡️ 【プレビュー・ポータル】フォールバック用の難読化データを使用して配信マスターを生成しました。");
         }
@@ -228,7 +233,6 @@
                 currentVoiceAudio.pause();
                 currentVoiceAudio.currentTime = 0;
             }
-            // voices/voice_〇〇.wav を指す
             currentVoiceAudio = new Audio(`voices/voice_${type}.wav`);
             currentVoiceAudio.play().catch((e) => {
                 console.log("ボイス再生がブラウザポリシーにブロックされました。一度画面をクリックしてから再生してください:", e);
@@ -249,7 +253,6 @@
             return selectedType;
         }
 
-        /* STREAMING_CHUNK:Configuring Google Authentication and Firebase sync... */
         // ==========================================================================
         // 2. 認証（Auth）とデータ同期ロジック
         // ==========================================================================
@@ -273,7 +276,6 @@
         });
 
         onAuthStateChanged(auth, async (user) => {
-            // 最初期に「隠しファイルの非同期ロードと復号」を走らせ、マスターデータを構築
             await loadSecretStreamData();
 
             if (user) {
@@ -369,7 +371,6 @@
             }
         }
 
-        /* STREAMING_CHUNK:Validating time checks and stamp logic... */
         // ==========================================================================
         // 3. スタンプ取得＆時間判定ロジック
         // ==========================================================================
@@ -485,7 +486,6 @@
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
         }
 
-        /* STREAMING_CHUNK:Rendering stamp rally grids on screen... */
         // ==========================================================================
         // 4. スタンプカードの動的生成 ＆ タップ時のボイス種類ごと初回制御
         // ==========================================================================
@@ -536,14 +536,11 @@
                     const stampClickArea = slot.querySelector('.stamp-trigger');
                     if (stampClickArea && savedStamp) {
                         stampClickArea.addEventListener('click', () => {
-                            // 👑 【仕様変更ロジック：種類ごとに初回判定】
-                            // リアタイかつ「この種類のボイスを今回のロード後に一度も再生していない」場合 ➔ 即ボイス再生、モーダルは開かない
                             if (savedStamp.status === 'active' && !playedVoiceTypes.has(savedStamp.type)) {
                                 soundPopup.play().catch(()=>{});
                                 playVoice(savedStamp.type);
-                                playedVoiceTypes.add(savedStamp.type); // 再生済み種類リストへ追加
+                                playedVoiceTypes.add(savedStamp.type); 
                             } else {
-                                // 2回目以降 or アーカイブ ➔ モーダルを通常展開
                                 soundPopup.play().catch(()=>{});
                                 openStampDetailModal(day, savedStamp);
                             }
@@ -577,7 +574,6 @@
         // 現在開いているモーダルのスタンプ種類を保管（再聴取イベントで使用）
         let activeModalStampType = null;
 
-        /* STREAMING_CHUNK:Opening interactive detail modals with animations... */
         // モーダルにデータを注入して開く関数
         function openStampDetailModal(day, stampData) {
             const modal = document.getElementById('stamp-detail-modal');
@@ -587,20 +583,19 @@
             const mDesc = document.getElementById('js-modal-desc');
             const mVoiceBtn = document.getElementById('js-modal-voice-btn');
 
-            // 📺 配信情報表示パーツの取得
             const mStreamTitle = document.getElementById('js-modal-stream-title');
             const mStreamThumb = document.getElementById('js-modal-stream-thumb');
             const mStreamLink = document.getElementById('js-modal-stream-link');
 
             mDate.innerText = `8/${day}`;
-            activeModalStampType = stampData.type; // 再生する種類をキャッシュ
+            activeModalStampType = stampData.type; 
 
-            // 配信データの紐付け
             const sData = getStreamDataByDay(day);
 
             if (sData) {
                 mStreamTitle.innerText = sData.title;
-                mStreamThumb.src = sData.thumbnail;
+                // 💡 sData.thumbnail を直接指定する代わりに、urlから100%自動で高画質サムネイルを取得するように変更
+                mStreamThumb.src = getYoutubeThumbnail(sData.url);
                 mStreamLink.href = sData.url;
             }
 
