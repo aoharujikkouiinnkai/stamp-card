@@ -131,8 +131,97 @@
                     <div class="card-footer-info">1st Week (8/1 - 8/7)</div>
                 </div>
 
-            </div> </section>
+            </div> 
+        </section>
     </main>
 
+    <script type="module">
+        // Firebaseの基本機能とAuth（ログイン）、Firestore（DB）の読み込み
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 1. Firebaseの初期化（★ステップ1のあなたのConfigに書き換えてください）
+        const firebaseConfig = {
+          apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
+          authDomain: "stamp-card-7272f.firebaseapp.com",
+          projectId: "stamp-card-7272f",
+          storageBucket: "stamp-card-7272f.firebasestorage.app",
+          messagingSenderId: "440814955407",
+          appId: "1:440814955407:web:490528d0d37465c066f9fa",
+          measurementId: "G-1SQCYTC3G2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // ==========================================================================
+        // 2. Googleログイン機能の実装
+        // ==========================================================================
+        const loginBtn = document.getElementById('google-login-btn');
+
+        // ログインボタンをクリックした時の処理
+        loginBtn.addEventListener('click', async () => {
+            // すでにログインしている場合はログアウト処理にする
+            if (auth.currentUser) {
+                await signOut(auth);
+                alert('ログアウトしました');
+                return;
+            }
+
+            // 未ログインの場合はGoogleポップアップサインインを実行
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                alert(`こんにちは、${user.displayName} さん！`);
+                
+                // Firestoreにユーザー初期データを保存（存在しなければ作成）
+                await initUserDocument(user);
+                
+            } catch (error) {
+                console.error("ログインエラー:", error);
+                alert("ログインに失敗しました。");
+            }
+        });
+
+        // ユーザーのログイン状態を監視する（ページを開いた時に自動で実行される）
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ログイン中：ボタンのテキストを「ログアウト」に変更
+                loginBtn.innerHTML = `
+                    <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
+                    <span>ログアウト</span>
+                `;
+                console.log("ログイン中のユーザー:", user.uid);
+                // TODO: ここでユーザーのスタンプ取得状況をFirestoreから読み込んで画面に反映する
+            } else {
+                // 未ログイン：ボタンを元の状態に戻す
+                loginBtn.innerHTML = `
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+                    <span>Googleでログイン</span>
+                `;
+            }
+        });
+
+        // Firestoreにユーザーの初期枠を作る関数
+        async function initUserDocument(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            // まだFirestoreにデータがない新規ユーザーの場合のみ作成
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email,
+                    createdAt: new Date().toISOString(),
+                    stamps: {} // 最初はスタンプ空っぽ
+                });
+                console.log("新しいユーザーをFirestoreに登録しました");
+            }
+        }
+    </script>
 </body>
 </html>
