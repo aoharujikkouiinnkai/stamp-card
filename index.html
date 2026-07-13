@@ -72,66 +72,9 @@
                 <p class="section-subtitle">8月の思い出を刻もう</p>
             </div>
 
-            <div class="cards-container">
-                
-                <div class="stamp-card-wrapper">
-                    <div class="stamp-card-inner">
-                        <img src="images/cardhaikei.png" alt="Card Background" class="card-bg-img">
-                        
-                        <div class="stamp-slot slot-sat" style="left: 16.2%; top: 75.1%;">
-                            <span class="date-badge">8/1</span>
-                            <div class="stamp-trigger" onclick="alert('配信情報モーダルを表示')">
-                                <img src="images/stamp_R1.png" alt="Stamp" class="stamp-icon active">
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-sun" style="left: 28.3%; top: 33.4%;">
-                            <span class="date-badge">8/2</span>
-                            <div class="stamp-trigger">
-                                <img src="images/stamp_archive.png" alt="Stamp" class="stamp-icon active">
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-mon" style="left: 39.4%; top: 76.8%;">
-                            <span class="date-badge">8/3</span>
-                            <div class="stamp-trigger">
-                                <div class="stamp-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-tue" style="left: 50.9%; top: 33.9%;">
-                            <span class="date-badge">8/4</span>
-                            <div class="stamp-trigger">
-                                <div class="stamp-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-wed" style="left: 61.9%; top: 75.5%;">
-                            <span class="date-badge">8/5</span>
-                            <div class="stamp-trigger">
-                                <div class="stamp-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-thu" style="left: 72.9%; top: 36.2%;">
-                            <span class="date-badge">8/6</span>
-                            <div class="stamp-trigger">
-                                <div class="stamp-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <div class="stamp-slot slot-fri" style="left: 84.4%; top: 75.6%;">
-                            <span class="date-badge">8/7</span>
-                            <div class="stamp-trigger">
-                                <div class="stamp-placeholder"></div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="card-footer-info">1st Week (8/1 - 8/7)</div>
-                </div>
-
-            </div> 
+            <div class="cards-container" id="js-cards-container">
+                <p style="text-align: center; color: var(--color-text-sub);">スタンプカードを生成中...</p>
+            </div>
         </section>
     </main>
 
@@ -141,7 +84,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 1. Firebaseの初期化（★ステップ1のあなたのConfigに書き換えてください）
+        // 1. Firebaseの初期化
         const firebaseConfig = {
           apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
           authDomain: "stamp-card-7272f.firebaseapp.com",
@@ -222,6 +165,93 @@
                 console.log("新しいユーザーをFirestoreに登録しました");
             }
         }
+
+        // ==========================================================================
+        // 3. 5週間分のスタンプカード自動生成システム
+        // ==========================================================================
+        
+        // 8月の全31日分のデータを定義（statusは将来的にFirestoreと連動します）
+        // 各週ごとにグループ化して管理
+        const stampWeeks = [
+            { title: "1st Week (8/1 - 8/7)", startDay: 1, endDay: 7 },
+            { title: "2nd Week (8/8 - 8/14)", startDay: 8, endDay: 14 },
+            { title: "3rd Week (8/15 - 8/21)", startDay: 15, endDay: 21 },
+            { title: "4th Week (8/22 - 8/28)", startDay: 22, endDay: 28 },
+            { title: "5th Week (8/29 - 8/31)", startDay: 29, endDay: 31 }
+        ];
+
+        // ジグザグ配置のための横座標（7日分）
+        // 16.2% から始まって、等間隔（約11.3%刻み）で右に配置
+        const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
+
+        function generateStampCards() {
+            const container = document.getElementById('js-cards-container');
+            container.innerHTML = ''; // ローディング表示をクリア
+
+            stampWeeks.forEach((week) => {
+                // 1. 週ごとの外枠（ラッパー）を作成
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'stamp-card-wrapper';
+
+                // 2. カードの内側（背景画像やスロットが入るエリア）を作成
+                const cardInner = document.createElement('div');
+                cardInner.className = 'stamp-card-inner';
+                cardInner.innerHTML = `<img src="images/cardhaikei.png" alt="Card Background" class="card-bg-img">`;
+
+                // 3. その週の日数分、スタンプスロットを計算して配置
+                let index = 0;
+                for (let day = week.startDay; day <= week.endDay; day++) {
+                    const slot = document.createElement('div');
+                    slot.className = `stamp-slot slot-day-${day}`;
+                    
+                    // 横座標(X)は配列から取得
+                    const leftStr = `${xPositions[index]}%`;
+                    // 縦座標(Y)は、奇数日は下(75%付近)、偶数日は上(34%付近)のジグザグ配置
+                    const topStr = index % 2 === 0 ? '75.5%' : '34%';
+                    
+                    slot.style.left = leftStr;
+                    slot.style.top = topStr;
+
+                    // テスト表示用：8/1と8/2だけアクティブなスタンプ画像を表示し、他はガイド線にする
+                    let stampContent = '';
+                    if (day === 1) {
+                        stampContent = `<div class="stamp-trigger" onclick="alert('配信情報モーダルを表示')">
+                                            <img src="images/stamp_R1.png" alt="Stamp" class="stamp-icon active">
+                                        </div>`;
+                    } else if (day === 2) {
+                        stampContent = `<div class="stamp-trigger">
+                                            <img src="images/stamp_archive.png" alt="Stamp" class="stamp-icon active">
+                                        </div>`;
+                    } else {
+                        stampContent = `<div class="stamp-trigger">
+                                            <div class="stamp-placeholder"></div>
+                                        </div>`;
+                    }
+
+                    // スロットの内部HTMLを組み立て
+                    slot.innerHTML = `
+                        <span class="date-badge">8/${day}</span>
+                        ${stampContent}
+                    `;
+                    
+                    cardInner.appendChild(slot);
+                    index++;
+                }
+
+                // 4. フッターの週情報を追加
+                const cardFooter = document.createElement('div');
+                cardFooter.className = 'card-footer-info';
+                cardFooter.innerText = week.title;
+
+                // 5. すべてを合体させて画面上のコンテナに挿入
+                cardWrapper.appendChild(cardInner);
+                cardWrapper.appendChild(cardFooter);
+                container.appendChild(cardWrapper);
+            });
+        }
+
+        // ページ読み込み時にスタンプカードを生成実行
+        generateStampCards();
     </script>
 </body>
 </html>
