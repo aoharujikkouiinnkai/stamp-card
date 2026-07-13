@@ -268,7 +268,7 @@ body {
 }
 
 /* ==========================================================================
-   3. スタンプカード専用スタイル (旧 card.css 分)
+   3. スタンプカード専用スタイル (サイズ拡大・調整版)
    ========================================================================== */
 .stamp-section {
     padding: 100px 20px;
@@ -333,11 +333,12 @@ body {
     display: block;
 }
 
+/* 【サイズ修正】スタンプスロットの大きさを約2.5倍（7% → 18%）に拡大 */
 .stamp-slot {
     position: absolute;
-    width: 7%;
+    width: 18%; 
     aspect-ratio: 1 / 1;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* 指定されたX,Y座標の中心にスタンプの中心が来るように調整 */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -345,18 +346,22 @@ body {
     z-index: 10;
 }
 
+/* 日付バッジの位置を、大きくなったスタンプの上へ自動調整 */
 .date-badge {
     position: absolute;
-    top: -25px;
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0,0,0,0.1);
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.75rem;
+    top: -10px; /* スタンプのサイズに合わせて位置を上方に調整 */
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: bold;
     color: var(--color-text-main);
     pointer-events: none;
     white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    z-index: 12;
 }
 
 .stamp-trigger {
@@ -366,11 +371,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .stamp-trigger:hover {
-    transform: scale(1.1);
+    transform: scale(1.08); /* 大きくなったのでホバー時の拡大率は少しマイルドに調整 */
 }
 
 .stamp-icon {
@@ -387,18 +392,20 @@ body {
     transform: scale(1);
 }
 
+/* 未取得状態のうっすらしたガイド円（スタンプの大きさに追従） */
 .stamp-placeholder {
-    width: 80%;
-    height: 80%;
-    border: 2px dashed rgba(0, 79, 255, 0.3);
+    width: 85%;
+    height: 85%;
+    border: 3px dashed rgba(0, 122, 255, 0.35); /* 線を少し太くして視認性アップ */
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transition: background 0.3s;
+    background: rgba(255, 255, 255, 0.25);
+    transition: all 0.3s ease;
 }
 
 .stamp-trigger:hover .stamp-placeholder {
-    background: rgba(0, 122, 255, 0.1);
+    background: rgba(0, 122, 255, 0.15);
     border-color: var(--color-primary-blue);
+    box-shadow: 0 0 15px rgba(0, 122, 255, 0.2);
 }
 
 .card-footer-info {
