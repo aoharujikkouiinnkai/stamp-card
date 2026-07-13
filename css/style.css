@@ -1,5 +1,5 @@
 /* ==========================================================================
-   共通変数定義（テーマカラー・フォント）
+   1. 共通変数定義（テーマカラー・フォント）
    ========================================================================== */
 :root {
     /* テーマカラー */
@@ -42,9 +42,7 @@ body {
     z-index: -2;
 }
 
-/* ==========================================================================
-   ガラス風UI共通コンポーネント
-   ========================================================================== */
+/* ガラス風UI共通コンポーネント */
 .glass-panel {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -62,9 +60,7 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* ==========================================================================
-   ボタン類のデザイン
-   ========================================================================== */
+/* ボタン類のデザイン */
 .btn-login {
     display: flex;
     align-items: center;
@@ -104,4 +100,312 @@ body {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+}
+
+/* ==========================================================================
+   2. 全体のレイアウト構造 (旧 layout.css 分)
+   ========================================================================== */
+.global-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 100;
+}
+
+.header-logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-primary-blue);
+    letter-spacing: 1px;
+}
+
+.main-container {
+    padding-top: 70px;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* ヒーローセクション（山型配置） */
+.hero-section {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    height: calc(100vh - 70px);
+    padding: 0 20px 40px 20px;
+    position: relative;
+    gap: 15px;
+}
+
+/* メンバー立ち絵のラッパー */
+.member-wrapper {
+    flex: 1;
+    max-width: 280px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 2;
+}
+
+.member-wrapper:hover {
+    transform: translateY(-10px) scale(1.03);
+}
+
+/* 【山型配置】外側を下げ、内側を上げる */
+.position-low {
+    transform: translateY(40px);
+}
+.position-low:hover {
+    transform: translateY(30px) scale(1.03);
+}
+
+.position-high {
+    transform: translateY(-20px);
+}
+.position-high:hover {
+    transform: translateY(-30px) scale(1.03);
+}
+
+/* 立ち絵のコンテナ */
+.stand-image-container {
+    width: 100%;
+    height: 600px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.member-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    bottom: 0;
+    position: absolute;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+    transition: filter 0.3s ease;
+}
+
+.member-wrapper:hover .member-img {
+    filter: drop-shadow(0 15px 25px rgba(0, 122, 255, 0.3));
+}
+
+.stand-image-container::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+    height: 85%;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    z-index: -1;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.member-name-tag {
+    position: absolute;
+    bottom: 20px;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    color: var(--color-text-main);
+    border: 1px solid rgba(255,255,255,0.5);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 中央テキストカード */
+.center-content-card {
+    flex: 1.5;
+    max-width: 450px;
+    padding: 40px 30px;
+    text-align: center;
+    align-self: center;
+    z-index: 3;
+    margin-bottom: 40px;
+}
+
+.group-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--color-primary-blue);
+    letter-spacing: 2px;
+}
+
+.catch-copy {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #4a5568;
+    margin-bottom: 20px;
+}
+
+.divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-aqua), var(--color-green));
+    margin: 0 auto 20px auto;
+    border-radius: 2px;
+}
+
+.description {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--color-text-sub);
+    margin-bottom: 30px;
+}
+
+/* ==========================================================================
+   3. スタンプカード専用スタイル (旧 card.css 分)
+   ========================================================================== */
+.stamp-section {
+    padding: 100px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.section-title-area {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.section-title {
+    font-size: 2.2rem;
+    color: var(--color-primary-blue);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-sub);
+    margin-top: 5px;
+}
+
+.cards-container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+.stamp-card-wrapper {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.stamp-card-inner {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 1920 / 1080;
+    background: #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+}
+
+.card-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.stamp-slot {
+    position: absolute;
+    width: 7%;
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.date-badge {
+    position: absolute;
+    top: -25px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--color-text-main);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.stamp-trigger {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.stamp-trigger:hover {
+    transform: scale(1.1);
+}
+
+.stamp-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stamp-icon.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.stamp-placeholder {
+    width: 80%;
+    height: 80%;
+    border: 2px dashed rgba(0, 79, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.3s;
+}
+
+.stamp-trigger:hover .stamp-placeholder {
+    background: rgba(0, 122, 255, 0.1);
+    border-color: var(--color-primary-blue);
+}
+
+.card-footer-info {
+    text-align: right;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--color-text-sub);
+    font-weight: bold;
+    letter-spacing: 1px;
 }
