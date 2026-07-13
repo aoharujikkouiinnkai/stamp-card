@@ -3,156 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8月限定！配信スタンプカード</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="images.js" defer></script>
+    <title>アオハル8月スタンプラリー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/animation.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
 
-    <h1>✨ 8月限定スタンプラリー ✨</h1>
-    <div class="info">現在のスタンプ：<span id="stamp-count">0</span> / 35</div>
+    <div class="sky-background"></div>
 
-    <div class="cards-wrapper" id="cards-wrapper"></div>
+    <header class="global-header header-glass">
+        <div class="header-logo">アオハル実行委員会</div>
+        <button id="google-login-btn" class="btn-login">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+            <span>Googleでログイン</span>
+        </button>
+    </header>
 
-    <div id="alert-msg" class="alert-msg"></div>
-
-    <div class="debug-controls" style="margin-top: 30px; display: flex; gap: 10px;">
-        <button onclick="addDebugStamp('live')" style="padding: 10px; background: #ff7675; color: white; border: none; border-radius: 5px; cursor: pointer;">テストでLive追加</button>
-        <button onclick="addDebugStamp('archive')" style="padding: 10px; background: #74b9ff; color: white; border: none; border-radius: 5px; cursor: pointer;">テストでArchive追加</button>
-        <button onclick="resetStamps()" style="padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer;">全リセット</button>
-    </div>
-
-    <script>
-        const STAMPS_PER_CARD = 7;
-        const TOTAL_CARDS = 5;
-        const MAX_STAMPS = STAMPS_PER_CARD * TOTAL_CARDS; 
-
-        // ★スタンプの座標設定（7つの穴の中心位置を土台画像の縦横に対する％で指定）
-        const STAMP_POSITIONS = [
-            { top: '75%', left: '16%' }, // 1個目の穴
-            { top: '35%', left: '27%' }, // 2個目の穴
-            { top: '75%', left: '39%' }, // 3個目の穴
-            { top: '35%', left: '50%' }, // 4個目の穴
-            { top: '75%', left: '61%' }, // 5個目の穴
-            { top: '35%', left: '71%' }, // 6個目の穴
-            { top: '75%', left: '82%' }  // 7個目の穴
-        ];
-
-        let savedData = JSON.parse(localStorage.getItem('stream_stamps_aug')) || { stamps: [], history: [] };
-
-        function renderCards() {
-            const wrapper = document.getElementById('cards-wrapper');
-            wrapper.innerHTML = '';
-
-            // images.js から画像パスを取得
-            const cardBgSrc = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.cardBase : 'images/cardhaikei.png';
-            const stampSrcMap = (typeof IMAGE_LIST !== 'undefined') ? IMAGE_LIST.stamps : { live: 'images/stamp_live.png', archive: 'images/stamp_archive.png' };
-
-            for (let cardIdx = 0; cardIdx < TOTAL_CARDS; cardIdx++) {
-                // コンテナを作成
-                const container = document.createElement('div');
-                container.className = 'card-container';
-
-                // 土台となる画像（cardhaikei.png）を配置
-                const bgImg = document.createElement('img');
-                bgImg.src = cardBgSrc;
-                bgImg.className = 'card-bg';
-                container.appendChild(bgImg);
-
-                // スタンプをその上に重ねていく
-                for (let stampIdx = 0; stampIdx < STAMPS_PER_CARD; stampIdx++) {
-                    const globalIdx = (cardIdx * STAMPS_PER_CARD) + stampIdx;
-
-                    if (savedData.stamps[globalIdx]) {
-                        const img = document.createElement('img');
-                        img.src = stampSrcMap[savedData.stamps[globalIdx]];
-                        img.className = 'stamp-element';
-                        
-                        const pos = STAMP_POSITIONS[stampIdx];
-                        if (pos) {
-                            img.style.top = pos.top;
-                            img.style.left = pos.left;
-                        }
-                        container.appendChild(img);
-                    }
-                }
-                wrapper.appendChild(container);
-            }
-            document.getElementById('stamp-count').innerText = savedData.stamps.length;
-        }
-
-        function processStamp() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const streamId = urlParams.get('id');    
-            const type = urlParams.get('type');      
-            const isDebug = urlParams.get('debug') === 'true'; 
-
-            if (!streamId || !type) {
-                renderCards();
-                return;
-            }
-
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1; 
+    <main class="main-container">
+        <section class="hero-section">
             
-            if (!isDebug && (currentYear !== 2026 || currentMonth !== 8)) {
-                showAlert('このスタンプカードは8月（8/1〜8/31）の期間外は使用できません。', 'error');
-                renderCards();
-                return;
-            }
+            <div class="member-wrapper member-rmi position-low" onclick="location.href='profile.html'">
+                <div class="stand-image-placeholder">
+                    <span class="member-name-tag">RMI</span>
+                    </div>
+            </div>
 
-            if (savedData.stamps.length >= MAX_STAMPS) {
-                showAlert('すべてのスタンプカードが満タンになりました！', 'error');
-                renderCards();
-                return;
-            }
+            <div class="member-wrapper member-sno position-high" onclick="location.href='profile.html'">
+                <div class="stand-image-placeholder">
+                    <span class="member-name-tag">SNO</span>
+                    </div>
+            </div>
 
-            if (savedData.history.includes(streamId)) {
-                showAlert('この配信のスタンプはすでに獲得済みです！', 'error');
-                renderCards();
-                return;
-            }
+            <div class="center-content-card glass-panel">
+                <h1 class="group-title">アオハル実行委員会</h1>
+                <p class="catch-copy">「僕たちの夏は、きっと終わらない。」</p>
+                <div class="divider"></div>
+                <p class="description">
+                    8月限定の特別配信スタンプラリーへようこそ。<br>
+                    リアルタイムで配信を視聴して、限定スタンプと特別なボイスを集めよう。
+                </p>
+                <a href="#stamp-section" class="btn-primary">スタンプカードを見る</a>
+            </div>
 
-            savedData.stamps.push(type);
-            savedData.history.push(streamId);
-            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
+            <div class="member-wrapper member-jan position-high" onclick="location.href='profile.html'">
+                <div class="stand-image-placeholder">
+                    <span class="member-name-tag">JAN</span>
+                    </div>
+            </div>
 
-            showAlert(`${type === 'live' ? '🔥リアルタイム視聴！' : '🎬アーカイブ視聴'} スタンプを押しました！`, 'success');
-            renderCards();
+            <div class="member-wrapper member-nns position-low" onclick="location.href='profile.html'">
+                <div class="stand-image-placeholder">
+                    <span class="member-name-tag">NNS</span>
+                    </div>
+            </div>
 
-            setTimeout(() => {
-                const cleanURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanURL);
-            }, 1500);
-        }
+        </section>
 
-        function showAlert(text, className) {
-            const alertBox = document.getElementById('alert-msg');
-            alertBox.innerText = text;
-            alertBox.className = `alert-msg ${className}`;
-            alertBox.style.display = 'block';
-            setTimeout(() => { alertBox.style.display = 'none'; }, 3000);
-        }
+        <section id="stamp-section" class="stamp-section">
+            </section>
+    </main>
 
-        function addDebugStamp(type) {
-            if (savedData.stamps.length >= MAX_STAMPS) return;
-            savedData.stamps.push(type);
-            savedData.history.push('debug_' + Date.now());
-            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
-            renderCards();
-        }
-
-        function resetStamps() {
-            savedData = { stamps: [], history: [] };
-            localStorage.setItem('stream_stamps_aug', JSON.stringify(savedData));
-            renderCards();
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderCards();
-            processStamp();
-        });
-    </script>
 </body>
 </html>
