@@ -4,28 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>アオハル8月スタンプラリー</title>
-    <style>
-        .stamp-card-wrapper { margin-bottom: 20px; }
-        .stamp-card-inner { position: relative; display: inline-block; }
-        .card-bg-img { display: block; max-width: 100%; height: auto; }
-        .stamp-slot { position: absolute; transform: translate(-50%, -50%); text-align: center; }
-        .stamp-icon { width: 50px; height: 50px; }
-        .stamp-placeholder { width: 50px; height: 50px; background: rgba(0,0,0,0.1); border-radius: 50%; }
-        .date-badge { display: block; font-size: 12px; font-weight: bold; }
-        .google-icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 5px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght=300;400;700&display=swap" rel="stylesheet">  
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/animation.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
 
-    <button id="google-login-btn" style="padding: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
-        <span>Googleでログイン</span>
-    </button>
+    <div class="sky-background"></div>
 
-    <hr>
+    <header class="global-header header-glass">
+        <div class="header-logo">アオハル実行委員会</div>
+        <button id="google-login-btn" class="btn-login">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+            <span>Googleでログイン</span>
+        </button>
+    </header>
 
-    <div id="js-cards-container"></div>
+    <main class="main-container">
+        <section class="hero-section">
+            
+            <div class="member-wrapper member-rmi position-low" onclick="location.href='profile.html?member=rmi'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuRMI.png" alt="RMI" class="member-img">
+                    <span class="member-name-tag">RMI</span>
+                </div>
+            </div>
 
+            <div class="member-wrapper member-sno position-high" onclick="location.href='profile.html?member=sno'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuSNO.png" alt="SNO" class="member-img">
+                    <span class="member-name-tag">SNO</span>
+                </div>
+            </div>
+
+            <div class="center-content-card glass-panel">
+                <h1 class="group-title">アオハル実行委員会</h1>
+                <p class="catch-copy">「僕たちの夏は、きっと終わらない。」</p>
+                <div class="divider"></div>
+                <p class="description">
+                    8月限定の特別配信スタンプラリーへようこそ。<br>
+                    リアルタイムで配信を視聴して、限定スタンプと特別なボイスを集めよう。
+                </p>
+                <a href="#stamp-section" class="btn-primary">スタンプカードを見る</a>
+            </div>
+
+            <div class="member-wrapper member-jan position-high" onclick="location.href='profile.html?member=jan'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuJAN.png" alt="JAN" class="member-img">
+                    <span class="member-name-tag">JAN</span>
+                </div>
+            </div>
+
+            <div class="member-wrapper member-nns position-low" onclick="location.href='profile.html?member=nns'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuNNS.png" alt="NNS" class="member-img">
+                    <span class="member-name-tag">NNS</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="stamp-section" class="stamp-section">
+            <div class="section-title-area">
+                <h2 class="section-title">Aoharu Stamp Card</h2>
+                <p class="section-subtitle">8月の思い出を刻もう</p>
+            </div>
+
+            <div class="cards-container" id="js-cards-container">
+                <p style="text-align: center; color: var(--color-text-sub);">スタンプカードを生成中...</p>
+            </div>
+        </section>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -63,10 +114,10 @@
         ];
         const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
 
-        // 👑 12種類のリアタイスタンプマスター配列
+        // 👑 【仕様変更】12種類のリアタイスタンプマスター配列
         const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
 
-        // 📂 配信IDと日付の1対1対応リスト
+        // 📂 【仕様変更】配信IDと日付の1対1対応リスト（type項目をすべて削除しました）
         const mockStampsMaster = {
             "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01" },
             "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02" },
@@ -103,25 +154,31 @@
 
         // 状態管理用オブジェクト
         let activeUserStamps = {};
-        let activeStampPool = []; 
+        let activeStampPool = []; // 🎲 ユーザー固有の未排出スタンププール
         let isUserDebug = false;  
 
         // ==========================================================================
-        // 重複なしランダム抽選 ＆ 自動リセットコアシステム
+        // 🆕 重複なしランダム抽選 ＆ 自動リセットコアシステム
         // ==========================================================================
         function drawRandomStampType() {
+            // プールが空、または存在しない場合は12種類で完全リセット（ループ仕様）
             if (!activeStampPool || activeStampPool.length === 0) {
                 activeStampPool = [...ALL_STAMP_TYPES];
                 console.log("🔄 【システム通知】12種類すべてのスタンプが出尽くしたため、プールをリセットしました！");
             }
+
+            // 残っているプールの中からランダムな位置を1つ選択
             const randomIndex = Math.floor(Math.random() * activeStampPool.length);
+            
+            // 選ばれたスタンプ種類をプールから抽出し、同時にプールから完全に削除（重複防止）
             const selectedType = activeStampPool.splice(randomIndex, 1)[0];
+            
             console.log(`🎲 残りプール数: ${activeStampPool.length} / 今回当選: ${selectedType}`);
             return selectedType;
         }
 
         // ==========================================================================
-        // 2. 認証（Auth）とデータ同期ロジック
+        // 2. 認証（Auth）とデータ同期ロジック（プール同期機能付き）
         // ==========================================================================
         const loginBtn = document.getElementById('google-login-btn');
 
@@ -159,9 +216,12 @@
             }
         });
 
+        // 未ログイン時：ローカルからスタンプとプールを復元
         function loadLocalStamps() {
             const localData = localStorage.getItem('aoharu_stamps');
             activeUserStamps = localData ? JSON.parse(localData) : {};
+            
+            // ローカルのプールデータを復元（なければ12種類で初期化）
             const localPool = localStorage.getItem('aoharu_stamp_pool');
             activeStampPool = localPool ? JSON.parse(localPool) : [...ALL_STAMP_TYPES];
 
@@ -169,6 +229,7 @@
             checkUrlParameterForStamp();
         }
 
+        // 🔐 LocalStorage と Firestore の完全同期（スタンプ＆抽選プール両対応）
         async function syncLocalStorageAndFirestore(user) {
             try {
                 const userRef = doc(db, "users", user.uid);
@@ -180,9 +241,10 @@
                 if (userSnap.exists()) {
                     const data = userSnap.data();
                     firestoreStamps = data.stamps || {};
-                    firestorePool = data.stampPool || []; 
+                    firestorePool = data.stampPool || []; // Firestoreから残りのプールを取得
                     isUserDebug = data.debug || false; 
                 } else {
+                    // 新規ユーザーデータ作成
                     await setDoc(userRef, {
                         uid: user.uid,
                         name: user.displayName,
@@ -190,20 +252,23 @@
                         createdAt: new Date().toISOString(),
                         debug: false, 
                         stamps: {},
-                        stampPool: [...ALL_STAMP_TYPES] 
+                        stampPool: [...ALL_STAMP_TYPES] // 初期プールは12種類フル
                     });
                     firestorePool = [...ALL_STAMP_TYPES];
                 }
 
+                // ローカル側のプールを読み込み
                 const localPoolStr = localStorage.getItem('aoharu_stamp_pool');
                 const localPool = localPoolStr ? JSON.parse(localPoolStr) : [...ALL_STAMP_TYPES];
 
+                // プールのマージロジック：クラウド（Firestore）にプールデータがあればそちらを優先、なければローカルを引き継ぐ
                 if (userSnap.exists() && firestorePool.length > 0) {
                     activeStampPool = firestorePool;
                 } else {
                     activeStampPool = localPool;
                 }
 
+                // スタンプ履歴のマージ（リアタイ優先）
                 const localDataStr = localStorage.getItem('aoharu_stamps');
                 const localStamps = localDataStr ? JSON.parse(localDataStr) : {};
                 let mergedStamps = { ...firestoreStamps };
@@ -221,6 +286,7 @@
 
                 activeUserStamps = mergedStamps;
 
+                // 両方のDBにスタンプ履歴と「最新のプール状態」を書き戻し
                 await updateDoc(userRef, { 
                     stamps: mergedStamps,
                     stampPool: activeStampPool
@@ -237,7 +303,7 @@
         }
 
         // ==========================================================================
-        // 3. スタンプ取得＆時間判定ロジック（デバッグ重複チェック厳格化、JSTタイムゾーン対策済）
+        // 3. スタンプ取得＆時間判定ロジック（Safari対策・音声ブロック・重複チェック厳格化マージ）
         // ==========================================================================
         function checkUrlParameterForStamp() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -255,7 +321,7 @@
 
             const stampKey = `day_${stampMaster.day}`;
 
-            // 🛑 【重複チェック①】すでにリアタイ(active)を獲得している場合は、デバッグ・通常問わず即エラー
+            // 🛑 【重複チェック①】すでにリアタイ(active)を獲得している場合は、通常・デバッグ問わず一律で重複エラー
             if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'active') {
                 soundError.play().catch(()=>{});
                 alert("この日付のスタンプはすでに取得しています！");
@@ -265,31 +331,35 @@
 
             let finalStatus = 'none';
 
+            // 👑 【特権機能】デバッグユーザー向けの特別処理
             if (isUserDebug) {
-                // 👑 【デバッグ特権】配信時間制限を完全に無視し、ステータスを自分で選択
                 const debugChoice = confirm(
-                    `【デバッグ特権モード】\n8月${stampMaster.day}日のスタンプを追加します（時間制限バイパス）。\n\n[OK] ➔ リアタイ判定 (active)\n[キャンセル] ➔ アーカイブ判定 (archive)`
+                    `【デバッグ特権モード】\n8月${stampMaster.day}日のスタンプを強制追加します。\n\n[OK] ➔ リアタイ判定 (active)\n[キャンセル] ➔ アーカイブ判定 (archive)`
                 );
                 finalStatus = debugChoice ? 'active' : 'archive';
+
             } else {
-                // 🕰️ 【通常ユーザー】時間判定システム（Safari対策で+09:00を明示）
+                // 🕰️ 通常ユーザーの時間判定システム（Safari用にタイムゾーン +09:00 を明示）
                 const now = new Date();
                 const startTime = new Date(`${stampMaster.targetDate}T21:00:00+09:00`);
                 const endTime = new Date(`${stampMaster.targetDate}T23:59:59+09:00`);
                 
                 if (now < startTime) {
+                    // ① 21:00以前：取得不可
                     soundError.play().catch(()=>{});
                     alert("配信前のため、まだスタンプは取得できません！");
                     removeUrlParameter();
                     return;
                 } else if (now >= startTime && now <= endTime) {
+                    // ② 21:00～23:59：リアタイ取得
                     finalStatus = 'active';
                 } else {
+                    // ③ 翌0:00以降：アーカイブ取得
                     finalStatus = 'archive';
                 }
             }
 
-            // 🛑 【重複チェック②】すでにアーカイブがあり、今回もアーカイブ判定の場合は、デバッグ・通常問わずエラー
+            // 🛑 【重複チェック②】既にアーカイブを持っていて、今回もアーカイブ判定なら通常・デバッグ問わず重複エラー
             if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'archive' && finalStatus === 'archive') {
                 soundError.play().catch(()=>{});
                 alert("この日付のスタンプはすでに取得しています！");
@@ -297,17 +367,25 @@
                 return;
             }
 
-            // 確定した取得ステータスに合わせてスタンプタイプを自動決定
-            let assignedType = "";
+            // 🎲 取得ステータスに応じたスタンプタイプの決定
+            let finalType = '';
             if (finalStatus === 'active') {
-                assignedType = drawRandomStampType();
+                // 既にこの日の有効なスタンプタイプがあれば引き継ぎ、無ければプールから新規抽選
+                if (activeUserStamps[stampKey] && activeUserStamps[stampKey].type) {
+                    finalType = activeUserStamps[stampKey].type;
+                } else {
+                    finalType = drawRandomStampType();
+                }
             } else {
-                assignedType = "archive";
+                // アーカイブ時は画像が固定（stamp_archive.png）になるため固定値を設定（プールを無駄遣いしない）
+                finalType = 'archive';
             }
 
-            saveAcquiredStamp(stampKey, finalStatus, assignedType, stampMaster.day);
+            // スタンプの保存処理へ
+            saveAcquiredStamp(stampKey, finalStatus, finalType, stampMaster.day);
         }
 
+        // スタンプデータを保存し、音を鳴らす内部関数（プール保存処理を追加）
         async function saveAcquiredStamp(stampKey, status, type, dayNumber) {
             const stampPayload = {
                 status: status,
@@ -316,27 +394,30 @@
             };
 
             activeUserStamps[stampKey] = stampPayload;
-            
+
+            // ① LocalStorage更新（スタンプ履歴 ＋ 抽選プール状態）
             localStorage.setItem('aoharu_stamps', JSON.stringify(activeUserStamps));
             localStorage.setItem('aoharu_stamp_pool', JSON.stringify(activeStampPool));
 
+            // ② ログイン済みならFirestoreも同時更新
             if (auth.currentUser) {
                 try {
                     const userRef = doc(db, "users", auth.currentUser.uid);
                     await updateDoc(userRef, { 
                         [`stamps.${stampKey}`]: stampPayload,
-                        stampPool: activeStampPool 
+                        stampPool: activeStampPool // 抽選プールも同期
                     });
                 } catch (e) {
                     console.error("Firestoreへのスタンプ書き込み失敗:", e);
                 }
             }
 
+            // 🔊 効果音演出（ブラウザブロック対策の .catch 追加）
             if (status === 'active') {
                 soundGet.play().catch(()=>{});
                 setTimeout(() => {
                     soundReal.play().catch(()=>{});
-                    alert(`🎉 8/${dayNumber} リアルタイム視聴スタンプ [${type}] をゲットしました！`);
+                    alert(`🎉 8/${dayNumber} リアルタイム視聴スタンプをゲットしました！`);
                 }, 400);
             } else {
                 soundGet.play().catch(()=>{});
@@ -347,13 +428,14 @@
             removeUrlParameter();
         }
 
+        // URLパラメータを消去
         function removeUrlParameter() {
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
         }
 
         // ==========================================================================
-        // 4. スタンプカードの動的生成
+        // 4. スタンプカードの動的生成 ＆ 表示分け仕様
         // ==========================================================================
         function generateStampCards() {
             const container = document.getElementById('js-cards-container');
@@ -373,22 +455,26 @@
                     const slot = document.createElement('div');
                     slot.className = `stamp-slot slot-day-${day}`;
                     slot.style.left = `${xPositions[index]}%`;
-                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%';
+                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%'; 
 
                     const stampKey = `day_${day}`;
                     const savedStamp = activeUserStamps[stampKey];
 
                     let stampContent = '';
 
+                    // 【表示分け】データのstatus状態によって表示画像を切り替える
                     if (savedStamp && savedStamp.status === 'active') {
+                        // リアタイ時：マスタ指定の手書きスタンプ (images/stamp_R1.png など)
                         stampContent = `<div class="stamp-trigger">
                                             <img src="images/stamp_${savedStamp.type}.png" alt="リアタイスタンプ" class="stamp-icon active">
                                         </div>`;
                     } else if (savedStamp && savedStamp.status === 'archive') {
+                        // アーカイブ時：汎用スタンプ (images/stamp_archive.png)
                         stampContent = `<div class="stamp-trigger">
                                             <img src="images/stamp_archive.png" alt="アーカイブスタンプ" class="stamp-icon active">
                                         </div>`;
                     } else {
+                        // 未取得：空のガイド線枠
                         stampContent = `<div class="stamp-trigger">
                                             <div class="stamp-placeholder"></div>
                                         </div>`;
@@ -399,11 +485,12 @@
                         ${stampContent}
                     `;
                     
+                    // 取得済みスタンプをクリックした時のポップアップ処理
                     const stampClickArea = slot.querySelector('.stamp-trigger');
                     if (stampClickArea && savedStamp) {
                         stampClickArea.addEventListener('click', () => {
                             soundPopup.play().catch(()=>{});
-                            alert(`日付: 8/${day}\nステータス: ${savedStamp.status === 'active' ? `リアルタイム取得 [種類: ${savedStamp.type}]` : 'アーカイブ取得'}`);
+                            alert(`日付: 8/${day}\nステータス: ${savedStamp.status === 'active' ? 'リアルタイム取得' : 'アーカイブ取得'}\n※ここでボイス再生や配信モーダルを開きます。`);
                         });
                     }
 
