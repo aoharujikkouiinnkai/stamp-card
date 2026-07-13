@@ -379,8 +379,8 @@ body {
 }
 
 .stamp-icon {
-    width: 130%;
-    height: 130%;
+    width: 125%;
+    height: 125%;
     object-fit: contain;
     opacity: 0;
     transform: scale(0.5);
