@@ -79,20 +79,20 @@
     </main>
 
     <script type="module">
-        // Firebaseの基本機能とAuth（ログイン）、Firestore（DB）の読み込み
+        // Firebaseの基本機能、Auth（ログイン）、Firestore（DB）の読み込み
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 1. Firebaseの初期化
+        // 1. Firebaseの初期化（元の接続情報を反映）
         const firebaseConfig = {
-          apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
-          authDomain: "stamp-card-7272f.firebaseapp.com",
-          projectId: "stamp-card-7272f",
-          storageBucket: "stamp-card-7272f.firebasestorage.app",
-          messagingSenderId: "440814955407",
-          appId: "1:440814955407:web:490528d0d37465c066f9fa",
-          measurementId: "G-1SQCYTC3G2"
+            apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
+            authDomain: "stamp-card-7272f.firebaseapp.com",
+            projectId: "stamp-card-7272f",
+            storageBucket: "stamp-card-7272f.firebasestorage.app",
+            messagingSenderId: "440814955407",
+            appId: "1:440814955407:web:490528d0d37465c066f9fa",
+            measurementId: "G-1SQCYTC3G2"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -100,78 +100,13 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // ==========================================================================
-        // 2. Googleログイン機能の実装
-        // ==========================================================================
-        const loginBtn = document.getElementById('google-login-btn');
+        // 🎵 効果音の定義
+        const soundGet = new Audio('sounds/get.mp3');     // ポン
+        const soundReal = new Audio('sounds/real.mp3');   // キラーン
+        const soundError = new Audio('sounds/error.mp3'); // ブッ
+        const soundPopup = new Audio('sounds/popup.mp3'); // シュッ
 
-        // ログインボタンをクリックした時の処理
-        loginBtn.addEventListener('click', async () => {
-            // すでにログインしている場合はログアウト処理にする
-            if (auth.currentUser) {
-                await signOut(auth);
-                alert('ログアウトしました');
-                return;
-            }
-
-            // 未ログインの場合はGoogleポップアップサインインを実行
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                alert(`こんにちは、${user.displayName} さん！`);
-                
-                // Firestoreにユーザー初期データを保存（存在しなければ作成）
-                await initUserDocument(user);
-                
-            } catch (error) {
-                console.error("ログインエラー:", error);
-                alert("ログインに失敗しました。");
-            }
-        });
-
-        // ユーザーのログイン状態を監視する（ページを開いた時に自動で実行される）
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // ログイン中：ボタンのテキストを「ログアウト」に変更
-                loginBtn.innerHTML = `
-                    <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
-                    <span>ログアウト</span>
-                `;
-                console.log("ログイン中のユーザー:", user.uid);
-                // TODO: ここでユーザーのスタンプ取得状況をFirestoreから読み込んで画面に反映する
-            } else {
-                // 未ログイン：ボタンを元の状態に戻す
-                loginBtn.innerHTML = `
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
-                    <span>Googleでログイン</span>
-                `;
-            }
-        });
-
-        // Firestoreにユーザーの初期枠を作る関数
-        async function initUserDocument(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
-            // まだFirestoreにデータがない新規ユーザーの場合のみ作成
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    createdAt: new Date().toISOString(),
-                    stamps: {} // 最初はスタンプ空っぽ
-                });
-                console.log("新しいユーザーをFirestoreに登録しました");
-            }
-        }
-
-        // ==========================================================================
-        // 3. 5週間分のスタンプカード自動生成システム
-        // ==========================================================================
-        
-        // 8月の全31日分のデータを定義（statusは将来的にFirestoreと連動します）
-        // 各週ごとにグループ化して管理
+        // 📅 8月のスタンプカード描画用データ構造
         const stampWeeks = [
             { title: "1st Week (8/1 - 8/7)", startDay: 1, endDay: 7 },
             { title: "2nd Week (8/8 - 8/14)", startDay: 8, endDay: 14 },
@@ -179,79 +114,304 @@
             { title: "4th Week (8/22 - 8/28)", startDay: 22, endDay: 28 },
             { title: "5th Week (8/29 - 8/31)", startDay: 29, endDay: 31 }
         ];
-
-        // ジグザグ配置のための横座標（7日分）
-        // 16.2% から始まって、等間隔（約11.3%刻み）で右に配置
         const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
 
+        // 📂 【運営用マスタ】配信データマスタ（2026年想定）
+        const mockStampsMaster = {
+            "stream_aoharu_01": { day: 1, targetDate: "2026-08-01", type: "R1" },
+            "stream_aoharu_02": { day: 2, targetDate: "2026-08-02", type: "S1" },
+            "stream_aoharu_03": { day: 3, targetDate: "2026-08-03", type: "JAN1" },
+            "stream_aoharu_04": { day: 4, targetDate: "2026-08-04", type: "N1" }
+        };
+
+        // 状態管理用オブジェクト（現在適用されているスタンプデータ）
+        let activeUserStamps = {};
+
+        // ==========================================================================
+        // 2. 認証（Auth）とデータ同期ロジック
+        // ==========================================================================
+        const loginBtn = document.getElementById('google-login-btn');
+
+        loginBtn.addEventListener('click', async () => {
+            if (auth.currentUser) {
+                if(confirm("ログアウトしますか？")) {
+                    await signOut(auth);
+                    alert('ログアウトしました。ローカルデータに戻ります。');
+                }
+                return;
+            }
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("ログインエラー:", error);
+                soundError.play();
+                alert("ログインに失敗しました。");
+            }
+        });
+
+        // ログイン状態が変化した時の監視リスナー
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginBtn.innerHTML = `
+                    <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
+                    <span>ログアウト</span>
+                `;
+                // 🔄 ログイン時は、LocalStorage と Firestore を同期・統合する
+                await syncLocalStorageAndFirestore(user);
+            } else {
+                loginBtn.innerHTML = `
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+                    <span>Googleでログイン</span>
+                `;
+                // 未ログイン時は LocalStorage から読み込む
+                loadLocalStamps();
+            }
+        });
+
+        // 未ログイン時：LocalStorageからスタンプ情報を読み込む関数
+        function loadLocalStamps() {
+            const localData = localStorage.getItem('aoharu_stamps');
+            activeUserStamps = localData ? JSON.parse(localData) : {};
+            generateStampCards();
+            // URLパラメータでのスタンプ取得チェックへ
+            checkUrlParameterForStamp();
+        }
+
+        // 🔐 LocalStorage と Firestore の統合同期（リアタイ優先）
+        async function syncLocalStorageAndFirestore(user) {
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                let firestoreStamps = {};
+                if (userSnap.exists()) {
+                    firestoreStamps = userSnap.data().stamps || {};
+                } else {
+                    // 新規ユーザー用の初期ドキュメント作成
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        createdAt: new Date().toISOString(),
+                        stamps: {}
+                    });
+                }
+
+                // LocalStorageのデータを取得
+                const localDataStr = localStorage.getItem('aoharu_stamps');
+                const localStamps = localDataStr ? JSON.parse(localDataStr) : {};
+
+                // 両方のデータを「リアタイ（active）優先」で統合
+                let mergedStamps = { ...firestoreStamps };
+
+                Object.keys(localStamps).forEach(key => {
+                    const localItem = localStamps[key];
+                    const firestoreItem = firestoreStamps[key];
+
+                    if (!firestoreItem) {
+                        mergedStamps[key] = localItem;
+                    } else if (localItem.status === 'active' && firestoreItem.status !== 'active') {
+                        // 【仕様】リアタイスタンプ ＞ アーカイブスタンプ を必ず優先
+                        mergedStamps[key] = localItem;
+                    }
+                });
+
+                // 統合した最終結果をグローバルに適用
+                activeUserStamps = mergedStamps;
+
+                // 統合データを Firestore と LocalStorage 両方に書き戻して完全同期
+                await updateDoc(userRef, { stamps: mergedStamps });
+                localStorage.setItem('aoharu_stamps', JSON.stringify(mergedStamps));
+
+                console.log("同期完了 (リアタイ優先統合):", mergedStamps);
+                generateStampCards();
+                
+                // URLパラメータでのスタンプ取得チェックへ
+                checkUrlParameterForStamp();
+
+            } catch (error) {
+                console.error("同期エラー:", error);
+            }
+        }
+
+        // ==========================================================================
+        // 3. 【仕様】スタンプ取得＆時間判定ロジック (?id=xxxxxxxx)
+        // ==========================================================================
+        function checkUrlParameterForStamp() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamId = urlParams.get('id');
+            
+            if (!streamId) return;
+
+            const stampMaster = mockStampsMaster[streamId];
+            if (!stampMaster) {
+                soundError.play();
+                alert("無効なスタンプURLです。");
+                removeUrlParameter();
+                return;
+            }
+
+            const stampKey = `day_${stampMaster.day}`;
+            
+            // 既にこの日のスタンプを「リアタイ(active)」で取得済みなら重複エラー
+            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'active') {
+                soundError.play();
+                alert("この日付のスタンプはすでに取得しています！");
+                removeUrlParameter();
+                return;
+            }
+
+            // 🕰️ 時間判定システム
+            const now = new Date();
+            const startTime = new Date(`${stampMaster.targetDate}T21:00:00`);
+            const endTime = new Date(`${stampMaster.targetDate}T23:59:59`);
+            
+            let finalStatus = 'none';
+
+            if (now < startTime) {
+                // ① 21:00以前：取得不可
+                soundError.play();
+                alert("配信前のため、まだスタンプは取得できません！");
+                removeUrlParameter();
+                return;
+            } else if (now >= startTime && now <= endTime) {
+                // ② 21:00～23:59：リアタイ取得
+                finalStatus = 'active';
+            } else {
+                // ③ 翌0:00以降：アーカイブ取得
+                finalStatus = 'archive';
+            }
+
+            // 既にアーカイブを持っていて、今回もアーカイブ判定なら重複
+            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'archive' && finalStatus === 'archive') {
+                soundError.play();
+                alert("この日付のスタンプはすでに取得しています！");
+                removeUrlParameter();
+                return;
+            }
+
+            // スタンプの保存処理へ
+            saveAcquiredStamp(stampKey, finalStatus, stampMaster.type, stampMaster.day);
+        }
+
+        // スタンプデータを保存し、音を鳴らす内部関数
+        async function saveAcquiredStamp(stampKey, status, type, dayNumber) {
+            const stampPayload = {
+                status: status,
+                type: type, 
+                updatedAt: new Date().toISOString()
+            };
+
+            activeUserStamps[stampKey] = stampPayload;
+
+            // ① LocalStorage更新
+            localStorage.setItem('aoharu_stamps', JSON.stringify(activeUserStamps));
+
+            // ② ログイン済みならFirestoreも同時更新
+            if (auth.currentUser) {
+                try {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    await updateDoc(userRef, { [`stamps.${stampKey}`]: stampPayload });
+                } catch (e) {
+                    console.error("Firestoreへのスタンプ書き込み失敗:", e);
+                }
+            }
+
+            // 🔊 効果音演出
+            if (status === 'active') {
+                soundGet.play();
+                setTimeout(() => {
+                    soundReal.play();
+                    alert(`🎉 8/${dayNumber} リアルタイム視聴スタンプをゲットしました！`);
+                }, 400);
+            } else {
+                soundGet.play();
+                alert(`🎬 8/${dayNumber} アーカイブスタンプをゲットしました！`);
+            }
+
+            generateStampCards();
+            removeUrlParameter();
+        }
+
+        // URLパラメータを消去
+        function removeUrlParameter() {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+
+        // ==========================================================================
+        // 4. スタンプカードの動的生成 ＆ 表示分け仕様
+        // ==========================================================================
         function generateStampCards() {
             const container = document.getElementById('js-cards-container');
-            container.innerHTML = ''; // ローディング表示をクリア
+            if (!container) return;
+            container.innerHTML = '';
 
             stampWeeks.forEach((week) => {
-                // 1. 週ごとの外枠（ラッパー）を作成
                 const cardWrapper = document.createElement('div');
                 cardWrapper.className = 'stamp-card-wrapper';
 
-                // 2. カードの内側（背景画像やスロットが入るエリア）を作成
                 const cardInner = document.createElement('div');
                 cardInner.className = 'stamp-card-inner';
                 cardInner.innerHTML = `<img src="images/cardhaikei.png" alt="Card Background" class="card-bg-img">`;
 
-                // 3. その週の日数分、スタンプスロットを計算して配置
                 let index = 0;
                 for (let day = week.startDay; day <= week.endDay; day++) {
                     const slot = document.createElement('div');
                     slot.className = `stamp-slot slot-day-${day}`;
-                    
-                    // 横座標(X)は配列から取得
-                    const leftStr = `${xPositions[index]}%`;
-                    // 縦座標(Y)は、奇数日は下(75%付近)、偶数日は上(34%付近)のジグザグ配置
-                    const topStr = index % 2 === 0 ? '75.5%' : '34%';
-                    
-                    slot.style.left = leftStr;
-                    slot.style.top = topStr;
+                    slot.style.left = `${xPositions[index]}%`;
+                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%';
 
-                    // テスト表示用：8/1と8/2だけアクティブなスタンプ画像を表示し、他はガイド線にする
+                    const stampKey = `day_${day}`;
+                    const savedStamp = activeUserStamps[stampKey];
+
                     let stampContent = '';
-                    if (day === 1) {
-                        stampContent = `<div class="stamp-trigger" onclick="alert('配信情報モーダルを表示')">
-                                            <img src="images/stamp_R1.png" alt="Stamp" class="stamp-icon active">
-                                        </div>`;
-                    } else if (day === 2) {
+
+                    // 【表示分け】データのstatus状態によって表示画像を切り替える
+                    if (savedStamp && savedStamp.status === 'active') {
+                        // リアタイ時：マスタ指定の手書きスタンプ (images/stamp_R1.png など)
                         stampContent = `<div class="stamp-trigger">
-                                            <img src="images/stamp_archive.png" alt="Stamp" class="stamp-icon active">
+                                            <img src="images/stamp_${savedStamp.type}.png" alt="リアタイスタンプ" class="stamp-icon active">
+                                        </div>`;
+                    } else if (savedStamp && savedStamp.status === 'archive') {
+                        // アーカイブ時：汎用スタンプ (images/stamp_archive.png)
+                        stampContent = `<div class="stamp-trigger">
+                                            <img src="images/stamp_archive.png" alt="アーカイブスタンプ" class="stamp-icon active">
                                         </div>`;
                     } else {
+                        // 未取得：空のガイド線枠
                         stampContent = `<div class="stamp-trigger">
                                             <div class="stamp-placeholder"></div>
                                         </div>`;
                     }
 
-                    // スロットの内部HTMLを組み立て
                     slot.innerHTML = `
                         <span class="date-badge">8/${day}</span>
                         ${stampContent}
                     `;
                     
+                    // 取得済みスタンプをクリックした時のポップアップ処理
+                    const stampClickArea = slot.querySelector('.stamp-trigger');
+                    if (stampClickArea && savedStamp) {
+                        stampClickArea.addEventListener('click', () => {
+                            soundPopup.play();
+                            alert(`日付: 8/${day}\nステータス: ${savedStamp.status === 'active' ? 'リアルタイム取得' : 'アーカイブ取得'}\n※ここでボイス再生や配信モーダルを開きます。`);
+                        });
+                    }
+
                     cardInner.appendChild(slot);
                     index++;
                 }
 
-                // 4. フッターの週情報を追加
                 const cardFooter = document.createElement('div');
                 cardFooter.className = 'card-footer-info';
                 cardFooter.innerText = week.title;
 
-                // 5. すべてを合体させて画面上のコンテナに挿入
                 cardWrapper.appendChild(cardInner);
                 cardWrapper.appendChild(cardFooter);
                 container.appendChild(cardWrapper);
             });
         }
-
-        // ページ読み込み時にスタンプカードを生成実行
-        generateStampCards();
     </script>
 </body>
 </html>
