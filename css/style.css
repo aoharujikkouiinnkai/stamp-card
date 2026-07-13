@@ -547,3 +547,213 @@ body {
     width: 100%;
     text-align: center;
 }
+
+/* ==========================================================================
+   5. 1人専用プロフィールページスタイル（修正版：立ち絵サイズ適正化）
+   ========================================================================== */
+.profile-single-container {
+    width: 100%;
+    max-width: 1100px; /* 少し横幅を広げてゆとりを持たせる */
+    margin: 0 auto;
+    padding: 60px 20px;
+    min-height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-header-actions {
+    margin-bottom: 24px;
+}
+
+/* 戻るボタン */
+.btn-back {
+    display: inline-block;
+    color: var(--color-text-main);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    box-shadow: var(--glass-shadow);
+}
+.btn-back:hover {
+    background: var(--color-primary-blue);
+    color: white;
+    transform: translateX(-4px);
+}
+
+/* メインの横並びカード */
+.profile-single-card {
+    display: flex;
+    width: 100%;
+    min-height: 500px;
+    border-radius: 32px;
+    padding: 40px;
+    gap: 40px; 
+    align-items: stretch; /* 左右の要素の高さを揃える */
+}
+
+/* 左側：立ち絵のステージ (サイズが暴走しないよう厳格に固定) */
+.profile-left-stage {
+    flex: 0 0 35%; /* 全体の35%の幅に完全に固定（デカくなりすぎないようガード） */
+    max-width: 320px;
+    display: flex;
+    align-items: flex-end; /* 下揃え */
+    justify-content: center;
+    position: relative;
+}
+
+.profile-standalone-image-wrapper {
+    width: 100%;
+    height: 100%;
+    min-height: 450px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+/* 立ち絵の後ろのガラス背景板 */
+.profile-standalone-image-wrapper::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 85%;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 【サイズ修正の要】縦横比を崩さず枠内に絶対に収める設定 */
+.single-member-img {
+    width: 100%;
+    height: 100%;
+    max-height: 480px; /* 縦に伸びすぎないよう上限を設定 */
+    object-fit: contain; /* アスペクト比を維持したまま、枠内に収める */
+    z-index: 2;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.15));
+}
+
+/* 右側：情報エリア */
+.profile-right-info {
+    flex: 1; /* 残りのスペースをすべて使う */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.single-color-badge {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+    padding: 4px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.single-member-name {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+}
+
+/* 説明文を包むガラスボックス */
+.intro-box {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.single-member-intro {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--color-text-main);
+    text-align: left;
+}
+
+/* リンクエリア */
+.single-profile-links {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px; /* ボタンが横に広がりすぎないように制限 */
+}
+
+.single-profile-links .link-item {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.yt-link {
+    background: rgba(255, 0, 0, 0.08);
+    color: #cc0000;
+    border: 1px solid rgba(255, 0, 0, 0.15);
+}
+.yt-link:hover {
+    background: #cc0000;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.sns-link {
+    background: rgba(0, 0, 0, 0.04);
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.sns-link:hover {
+    background: #1a1a1a;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 横幅が狭いスマホ用のレスポンシブ対応 */
+@media (max-width: 768px) {
+    .profile-single-card {
+        flex-direction: column;
+        padding: 24px;
+        gap: 20px;
+    }
+    .profile-left-stage {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+    }
+    .profile-standalone-image-wrapper {
+        height: 350px;
+        min-height: auto;
+    }
+    .single-member-img {
+        max-height: 350px;
+    }
+    .single-member-name {
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+    }
+    .profile-right-info {
+        width: 100%;
+        align-items: center;
+    }
+    .single-profile-links {
+        max-width: 100%;
+    }
+}
