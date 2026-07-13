@@ -1,52 +1,55 @@
-/* layout.css - レイアウトと共通コンポーネント */
-:root{
-  --aoharu-blue: #3BA9FF;
-  --aoharu-sky: #BEE9FF;
-  --aoharu-green: #7ED957;
-  --glass-bg: rgba(255,255,255,0.45);
-  --glass-border: rgba(255,255,255,0.6);
-  --text-dark: #04314a;
-  --muted: #6b7d86;
+/* （前回の内容に追加・更新する部分のみ抜粋） */
+
+/* 立ち絵のコンテナ修正 */
+.stand-image-container {
+    width: 100%;
+    height: 600px; /* 少し高さを確保 */
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
 }
 
-/* header / footer */
-.site-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 20px;
-  background: linear-gradient(180deg, var(--aoharu-sky) 0%, #ffffff 100%);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-.site-title{ font-size:18px; color:var(--text-dark); margin:0 }
-
-.btn-primary{
-  background: linear-gradient(180deg,var(--aoharu-blue), #1f94e0);
-  color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer;
-  box-shadow: 0 6px 18px rgba(59,169,255,0.18);
-}
-.btn-ghost{ background:transparent; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:8px; cursor:pointer }
-
-.hero{ padding:28px 16px; }
-.hero-inner{ max-width:1100px; margin:0 auto; display:flex; align-items:flex-end; gap:20px }
-.characters{ display:flex; gap:12px; align-items:flex-end; transform: translateY(6px); }
-.characters .char{ width:110px; height:auto; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.1)); padding:8px }
-.hero-text{ color:var(--text-dark) }
-.group-name{ font-size:28px; margin:0 0 6px 0 }
-.catch{ margin:0; color:var(--muted) }
-
-main{ padding-bottom:80px }
-
-/* glass panel utility */
-.glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(6px) saturate(120%);
-  border-radius:12px;
+/* 実際の立ち絵画像スタイル */
+.member-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* アスペクト比を維持して収める */
+    bottom: 0;
+    position: absolute;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+    transition: filter 0.3s ease;
 }
 
-/* card section */
-.card-section{ margin-top:18px; display:flex; flex-direction:column; align-items:center }
-.card-section h2{ margin:8px 0 14px 0 }
+.member-wrapper:hover .member-img {
+    filter: drop-shadow(0 15px 25px rgba(0, 122, 255, 0.3)); /* ホバー時にメンバーカラー風の影（例） */
+}
 
-footer{ padding:18px; text-align:center; color:var(--muted); font-size:13px }
+/* 画像がない場合のバックアップ背景（点線枠は外し、ガラス風に馴染ませる） */
+.stand-image-container::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+    height: 85%;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    z-index: -1;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.member-name-tag {
+    position: absolute;
+    bottom: 20px;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    color: var(--color-text-main);
+    border: 1px solid rgba(255,255,255,0.5);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
