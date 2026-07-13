@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>アオハル8月スタンプラリー</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">  
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght=300;400;700&display=swap" rel="stylesheet">  
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/animation.css">
@@ -79,20 +79,18 @@
     </main>
 
     <script type="module">
-        // Firebaseモジュールの読み込み
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // 1. Firebaseの初期化（有効な接続情報を維持）
+        // 1. Firebase初期化（実際のConfigに書き換えてください）
         const firebaseConfig = {
-            apiKey: "AIzaSyDfdA0SWO8YY-AazrxKAWFXpAccsUY0JiQ",
-            authDomain: "stamp-card-7272f.firebaseapp.com",
-            projectId: "stamp-card-7272f",
-            storageBucket: "stamp-card-7272f.firebasestorage.app",
-            messagingSenderId: "440814955407",
-            appId: "1:440814955407:web:490528d0d37465c066f9fa",
-            measurementId: "G-1SQCYTC3G2"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -101,10 +99,10 @@
         const provider = new GoogleAuthProvider();
 
         // 🎵 効果音の定義
-        const soundGet = new Audio('sounds/get.mp3');     // ポン
-        const soundReal = new Audio('sounds/real.mp3');   // キラーン
-        const soundError = new Audio('sounds/error.mp3'); // ブッ
-        const soundPopup = new Audio('sounds/popup.mp3'); // シュッ
+        const soundGet = new Audio('sounds/get.mp3');     
+        const soundReal = new Audio('sounds/real.mp3');   
+        const soundError = new Audio('sounds/error.mp3'); 
+        const soundPopup = new Audio('sounds/popup.mp3'); 
 
         // 📅 8月のスタンプカード描画用データ構造
         const stampWeeks = [
@@ -116,47 +114,71 @@
         ];
         const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
 
-        // 📂 【運営用マスタ】配信データマスタ（31日分フル対応版）
+        // 👑 【仕様変更】12種類のリアタイスタンプマスター配列
+        const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
+
+        // 📂 【仕様変更】配信IDと日付の1対1対応リスト（type項目をすべて削除しました）
         const mockStampsMaster = {
-            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01", type: "R1" },
-            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02", type: "S1" },
-            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03", type: "J1" },
-            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04", type: "N1" },
-            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05", type: "R2" },
-            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06", type: "S2" },
-            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07", type: "J2" },
-            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08", type: "N2" },
-            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", type: "R3" },
-            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10", type: "S3" },
-            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11", type: "J3" },
-            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12", type: "N3" },
-            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13", type: "R1" },
-            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14", type: "S1" },
-            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15", type: "J1" },
-            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16", type: "N1" },
-            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17", type: "R2" },
-            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18", type: "S2" },
-            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19", type: "J2" },
-            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20", type: "N2" },
-            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21", type: "R3" },
-            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22", type: "S3" },
-            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23", type: "J3" },
-            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24", type: "N3" },
-            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25", type: "R1" },
-            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26", type: "S1" },
-            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27", type: "J1" },
-            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28", type: "N1" },
-            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29", type: "R2" },
-            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30", type: "S2" },
-            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31", type: "J2" }
+            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01" },
+            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02" },
+            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03" },
+            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04" },
+            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05" },
+            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06" },
+            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07" },
+            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08" },
+            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09" },
+            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10" },
+            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11" },
+            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12" },
+            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13" },
+            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14" },
+            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15" },
+            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16" },
+            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17" },
+            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18" },
+            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19" },
+            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20" },
+            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21" },
+            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22" },
+            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23" },
+            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24" },
+            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25" },
+            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26" },
+            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27" },
+            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28" },
+            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29" },
+            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30" },
+            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31" }
         };
 
         // 状態管理用オブジェクト
         let activeUserStamps = {};
-        let isUserDebug = false; // 👑 ログイン中ユーザーのデバッグ権限フラグ
+        let activeStampPool = []; // 🎲 ユーザー固有の未排出スタンププール
+        let isUserDebug = false;  
 
         // ==========================================================================
-        // 2. 認証（Auth）とデータ同期ロジック
+        // 🆕 重複なしランダム抽選 ＆ 自動リセットコアシステム
+        // ==========================================================================
+        function drawRandomStampType() {
+            // プールが空、または存在しない場合は12種類で完全リセット（ループ仕様）
+            if (!activeStampPool || activeStampPool.length === 0) {
+                activeStampPool = [...ALL_STAMP_TYPES];
+                console.log("🔄 【システム通知】12種類すべてのスタンプが出尽くしたため、プールをリセットしました！");
+            }
+
+            // 残っているプールの中からランダムな位置を1つ選択
+            const randomIndex = Math.floor(Math.random() * activeStampPool.length);
+            
+            // 選ばれたスタンプ種類をプールから抽出し、同時にプールから完全に削除（重複防止）
+            const selectedType = activeStampPool.splice(randomIndex, 1)[0];
+            
+            console.log(`🎲 残りプール数: ${activeStampPool.length} / 今回当選: ${selectedType}`);
+            return selectedType;
+        }
+
+        // ==========================================================================
+        // 2. 認証（Auth）とデータ同期ロジック（プール同期機能付き）
         // ==========================================================================
         const loginBtn = document.getElementById('google-login-btn');
 
@@ -164,7 +186,7 @@
             if (auth.currentUser) {
                 if(confirm("ログアウトしますか？")) {
                     await signOut(auth);
-                    alert('ログアウトしました。ローカルデータに戻ります。');
+                    alert('ログアウトしました。');
                 }
                 return;
             }
@@ -177,65 +199,78 @@
             }
         });
 
-        // ログイン状態が変化した時の監視リスナー
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginBtn.innerHTML = `
                     <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
                     <span>ログアウト</span>
                 `;
-                // LocalStorage と Firestore を同期・統合する
                 await syncLocalStorageAndFirestore(user);
             } else {
                 loginBtn.innerHTML = `
                     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
                     <span>Googleでログイン</span>
                 `;
-                isUserDebug = false; // ログアウト時はデバッグ権限をリセット
+                isUserDebug = false; 
                 loadLocalStamps();
             }
         });
 
-        // 未ログイン時：LocalStorageからスタンプ情報を読み込む
+        // 未ログイン時：ローカルからスタンプとプールを復元
         function loadLocalStamps() {
             const localData = localStorage.getItem('aoharu_stamps');
             activeUserStamps = localData ? JSON.parse(localData) : {};
+            
+            // ローカルのプールデータを復元（なければ12種類で初期化）
+            const localPool = localStorage.getItem('aoharu_stamp_pool');
+            activeStampPool = localPool ? JSON.parse(localPool) : [...ALL_STAMP_TYPES];
+
             generateStampCards();
             checkUrlParameterForStamp();
         }
 
-        // LocalStorage と Firestore の統合同期（リアタイ優先）
+        // 🔐 LocalStorage と Firestore の完全同期（スタンプ＆抽選プール両対応）
         async function syncLocalStorageAndFirestore(user) {
             try {
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 
                 let firestoreStamps = {};
+                let firestorePool = [];
+
                 if (userSnap.exists()) {
                     const data = userSnap.data();
                     firestoreStamps = data.stamps || {};
-                    // 🔍 同期前にデバッグ権限をチェック・保持
+                    firestorePool = data.stampPool || []; // Firestoreから残りのプールを取得
                     isUserDebug = data.debug || false; 
-                    if (isUserDebug) {
-                        console.log("🛡️ デバッグ権限が有効なユーザーです。");
-                    }
                 } else {
-                    // 新規ユーザー用の初期ドキュメント作成（デフォルトで debug: false）
+                    // 新規ユーザーデータ作成
                     await setDoc(userRef, {
                         uid: user.uid,
                         name: user.displayName,
                         email: user.email,
                         createdAt: new Date().toISOString(),
-                        debug: false,
-                        stamps: {}
+                        debug: false, 
+                        stamps: {},
+                        stampPool: [...ALL_STAMP_TYPES] // 初期プールは12種類フル
                     });
+                    firestorePool = [...ALL_STAMP_TYPES];
                 }
 
-                // LocalStorageのデータを取得
+                // ローカル側のプールを読み込み
+                const localPoolStr = localStorage.getItem('aoharu_stamp_pool');
+                const localPool = localPoolStr ? JSON.parse(localPoolStr) : [...ALL_STAMP_TYPES];
+
+                // プールのマージロジック：クラウド（Firestore）にプールデータがあればそちらを優先、なければローカルを引き継ぐ
+                if (userSnap.exists() && firestorePool.length > 0) {
+                    activeStampPool = firestorePool;
+                } else {
+                    activeStampPool = localPool;
+                }
+
+                // スタンプ履歴のマージ（リアタイ優先）
                 const localDataStr = localStorage.getItem('aoharu_stamps');
                 const localStamps = localDataStr ? JSON.parse(localDataStr) : {};
-
-                // 両方のデータを「リアタイ（active）優先」で統合
                 let mergedStamps = { ...firestoreStamps };
 
                 Object.keys(localStamps).forEach(key => {
@@ -245,19 +280,20 @@
                     if (!firestoreItem) {
                         mergedStamps[key] = localItem;
                     } else if (localItem.status === 'active' && firestoreItem.status !== 'active') {
-                        // 【仕様】リアタイスタンプ ＞ アーカイブスタンプ を必ず優先
                         mergedStamps[key] = localItem;
                     }
                 });
 
-                // 統合した最終結果をグローバルに適用
                 activeUserStamps = mergedStamps;
 
-                // 統合データを Firestore と LocalStorage 両方に書き戻して完全同期
-                await updateDoc(userRef, { stamps: mergedStamps });
+                // 両方のDBにスタンプ履歴と「最新のプール状態」を書き戻し
+                await updateDoc(userRef, { 
+                    stamps: mergedStamps,
+                    stampPool: activeStampPool
+                });
                 localStorage.setItem('aoharu_stamps', JSON.stringify(mergedStamps));
+                localStorage.setItem('aoharu_stamp_pool', JSON.stringify(activeStampPool));
 
-                console.log("同期完了 (リアタイ優先統合):", mergedStamps);
                 generateStampCards();
                 checkUrlParameterForStamp();
 
@@ -267,7 +303,7 @@
         }
 
         // ==========================================================================
-        // 3. 【仕様】スタンプ取得＆時間判定ロジック (?id=xxxxxxxx)
+        // 3. スタンプ取得＆時間判定ロジック（補完完了）
         // ==========================================================================
         function checkUrlParameterForStamp() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -288,12 +324,9 @@
 
             // 👑 【特権機能】デバッグユーザー向けの特別処理
             if (isUserDebug) {
-                // 1. 時間制限チェックを完全にバイパスして強制追加
-                // 2. ダイアログで「リアタイ（active）」か「アーカイブ（archive）」を選択
                 const debugChoice = confirm(
                     `【デバッグ特権モード】\n8月${stampMaster.day}日のスタンプを強制追加します。\n\n[OK] ➔ リアタイ判定 (active)\n[キャンセル] ➔ アーカイブ判定 (archive)`
                 );
-                
                 finalStatus = debugChoice ? 'active' : 'archive';
 
             } else {
@@ -334,11 +367,25 @@
                 }
             }
 
+            // 🎲 取得ステータスに応じたスタンプタイプの決定
+            let finalType = '';
+            if (finalStatus === 'active') {
+                // 既にこの日の有効なスタンプタイプがあれば引き継ぎ、無ければプールから新規抽選
+                if (activeUserStamps[stampKey] && activeUserStamps[stampKey].type) {
+                    finalType = activeUserStamps[stampKey].type;
+                } else {
+                    finalType = drawRandomStampType();
+                }
+            } else {
+                // アーカイブ時は画像が固定（stamp_archive.png）になるため固定値を設定（プールを無駄遣いしない）
+                finalType = 'archive';
+            }
+
             // スタンプの保存処理へ
-            saveAcquiredStamp(stampKey, finalStatus, stampMaster.type, stampMaster.day);
+            saveAcquiredStamp(stampKey, finalStatus, finalType, stampMaster.day);
         }
 
-        // スタンプデータを保存し、音を鳴らす内部関数
+        // スタンプデータを保存し、音を鳴らす内部関数（プール保存処理を追加）
         async function saveAcquiredStamp(stampKey, status, type, dayNumber) {
             const stampPayload = {
                 status: status,
@@ -348,14 +395,18 @@
 
             activeUserStamps[stampKey] = stampPayload;
 
-            // ① LocalStorage更新
+            // ① LocalStorage更新（スタンプ履歴 ＋ 抽選プール状態）
             localStorage.setItem('aoharu_stamps', JSON.stringify(activeUserStamps));
+            localStorage.setItem('aoharu_stamp_pool', JSON.stringify(activeStampPool));
 
             // ② ログイン済みならFirestoreも同時更新
             if (auth.currentUser) {
                 try {
                     const userRef = doc(db, "users", auth.currentUser.uid);
-                    await updateDoc(userRef, { [`stamps.${stampKey}`]: stampPayload });
+                    await updateDoc(userRef, { 
+                        [`stamps.${stampKey}`]: stampPayload,
+                        stampPool: activeStampPool // 抽選プールも同期
+                    });
                 } catch (e) {
                     console.error("Firestoreへのスタンプ書き込み失敗:", e);
                 }
@@ -404,7 +455,7 @@
                     const slot = document.createElement('div');
                     slot.className = `stamp-slot slot-day-${day}`;
                     slot.style.left = `${xPositions[index]}%`;
-                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%'; // 途切れバグを修正
+                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%'; 
 
                     const stampKey = `day_${day}`;
                     const savedStamp = activeUserStamps[stampKey];
