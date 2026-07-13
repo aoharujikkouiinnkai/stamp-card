@@ -1,64 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>アオハル 8月スタンプラリー（デモ）</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/card.css">
-  <link rel="stylesheet" href="css/popup.css">
-  <link rel="stylesheet" href="css/animation.css">
-  <link rel="stylesheet" href="css/responsive.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アオハル8月スタンプラリー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/card.css">
+    <link rel="stylesheet" href="css/animation.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="login-area">
-      <button id="btn-login" class="btn-primary">Googleログイン</button>
-      <button id="btn-logout" class="btn-ghost" style="display:none">ログアウト</button>
-    </div>
-    <h1 class="site-title">アオハル 8月スタンプラリー（デモ）</h1>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="characters">
-          <img src="images/AoharuRMI.png" alt="RMI" class="char rmi">
-          <img src="images/AoharuSNO.png" alt="SNO" class="char sno">
-          <img src="images/AoharuJAN.png" alt="JAN" class="char jan">
-          <img src="images/AoharuNNS.png" alt="NNS" class="char nns">
-        </div>
-        <div class="hero-text">
-          <h2 class="group-name">アオハル</h2>
-          <p class="catch">青空・学校・夏。アオハルな時間を共有しよう。</p>
-        </div>
-      </div>
-    </section>
+    <div class="sky-background"></div>
 
-    <section class="card-section">
-      <h2>スタンプカード</h2>
-      <div id="card" class="card">
-        <img src="images/cardhaikei.png" alt="card background" class="card-bg">
-        <div id="stamps-container" class="stamps-container"></div>
-      </div>
-    </section>
+    <header class="global-header header-glass">
+        <div class="header-logo">アオハル実行委員会</div>
+        <button id="google-login-btn" class="btn-login">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+            <span>Googleでログイン</span>
+        </button>
+    </header>
 
-    <section id="debug-panel" class="debug" style="display:none">
-      <h3>DEBUG</h3>
-      <button id="btn-sync">同期（Local → Firestore）</button>
-      <button id="btn-clear-local">LocalStorage 初期化</button>
-    </section>
-  </main>
+    <main class="main-container">
+        <section class="hero-section">
+            
+            <div class="member-wrapper member-rmi position-low" onclick="location.href='profile.html'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuRMI.png" alt="RMI" class="member-img">
+                    <span class="member-name-tag">RMI</span>
+                </div>
+            </div>
 
-  <footer>
-    <p>デモ実装 — Firebase 設定は firebase/firebaseConfig.js を差し替えてください。</p>
-  </footer>
+            <div class="member-wrapper member-sno position-high" onclick="location.href='profile.html'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuSNO.png" alt="SNO" class="member-img">
+                    <span class="member-name-tag">SNO</span>
+                </div>
+            </div>
 
-  <script src="js/utils.js"></script>
-  <script src="js/firebase.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/stampManager.js"></script>
-  <script src="js/app.js"></script>
+            <div class="center-content-card glass-panel">
+                <h1 class="group-title">アオハル実行委員会</h1>
+                <p class="catch-copy">「僕たちの夏は、きっと終わらない。」</p>
+                <div class="divider"></div>
+                <p class="description">
+                    8月限定の特別配信スタンプラリーへようこそ。<br>
+                    リアルタイムで配信を視聴して、限定スタンプと特別なボイスを集めよう。
+                </p>
+                <a href="#stamp-section" class="btn-primary">スタンプカードを見る</a>
+            </div>
+
+            <div class="member-wrapper member-jan position-high" onclick="location.href='profile.html'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuJAN.png" alt="JAN" class="member-img">
+                    <span class="member-name-tag">JAN</span>
+                </div>
+            </div>
+
+            <div class="member-wrapper member-nns position-low" onclick="location.href='profile.html'">
+                <div class="stand-image-container">
+                    <img src="images/AoharuNNS.png" alt="NNS" class="member-img">
+                    <span class="member-name-tag">NNS</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="stamp-section" class="stamp-section">
+            <div class="section-title-area">
+                <h2 class="section-title">Aoharu Stamp Card</h2>
+                <p class="section-subtitle">8月の思い出を刻もう</p>
+            </div>
+
+            <div class="cards-container">
+                
+                <div class="stamp-card-wrapper">
+                    <div class="stamp-card-inner">
+                        <img src="images/cardhaikei.png" alt="Card Background" class="card-bg-img">
+                        
+                        <div class="stamp-slot slot-sat" style="left: 16.2%; top: 75.1%;">
+                            <span class="date-badge">8/1</span>
+                            <div class="stamp-trigger" onclick="alert('配信情報モーダルを表示')">
+                                <img src="images/stamp_R1.png" alt="Stamp" class="stamp-icon active">
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-sun" style="left: 28.3%; top: 33.4%;">
+                            <span class="date-badge">8/2</span>
+                            <div class="stamp-trigger">
+                                <img src="images/stamp_archive.png" alt="Stamp" class="stamp-icon active">
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-mon" style="left: 39.4%; top: 76.8%;">
+                            <span class="date-badge">8/3</span>
+                            <div class="stamp-trigger">
+                                <div class="stamp-placeholder"></div>
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-tue" style="left: 50.9%; top: 33.9%;">
+                            <span class="date-badge">8/4</span>
+                            <div class="stamp-trigger">
+                                <div class="stamp-placeholder"></div>
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-wed" style="left: 61.9%; top: 75.5%;">
+                            <span class="date-badge">8/5</span>
+                            <div class="stamp-trigger">
+                                <div class="stamp-placeholder"></div>
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-thu" style="left: 72.9%; top: 36.2%;">
+                            <span class="date-badge">8/6</span>
+                            <div class="stamp-trigger">
+                                <div class="stamp-placeholder"></div>
+                            </div>
+                        </div>
+
+                        <div class="stamp-slot slot-fri" style="left: 84.4%; top: 75.6%;">
+                            <span class="date-badge">8/7</span>
+                            <div class="stamp-trigger">
+                                <div class="stamp-placeholder"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer-info">1st Week (8/1 - 8/7)</div>
+                </div>
+
+                </div>
+        </section>
+    </main>
+
 </body>
 </html>
