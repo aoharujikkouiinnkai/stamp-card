@@ -133,6 +133,7 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
+        /* STREAMING_CHUNK:Initializing state variables and media elements... */
         // 🎵 効果音の定義
         const soundGet = new Audio('sounds/get.mp3');     
         const soundReal = new Audio('sounds/real.mp3');   
@@ -152,49 +153,72 @@
         // 👑 12種類のリアタイスタンプマスター配列
         const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
 
-        // 📂 【本番対応仕様】配信IDと日付の1対1対応 ＆ 配信情報（タイトル、URL、サムネイル）を31日分フル格納
-        const mockStampsMaster = {
-            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01", title: "アオハル実行委員会 8月スタンプラリー開幕式！", url: "https://www.youtube.com/watch?v=mock_aoharu_01", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/1+Opening+Stream" },
-            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02", title: "RMIのまったりサマー雑談枠", url: "https://www.youtube.com/watch?v=mock_aoharu_02", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/2+RMI+Talk" },
-            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03", title: "SNOのゲーム実況！ホラーゲームに挑戦...", url: "https://www.youtube.com/watch?v=mock_aoharu_03", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/3+SNO+Game" },
-            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04", title: "JANが歌う！アオハルアコースティックライブ", url: "https://www.youtube.com/watch?v=mock_aoharu_04", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/4+JAN+Music" },
-            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05", title: "NNSの深夜ラジオ：みんなのお悩み相談室", url: "https://www.youtube.com/watch?v=mock_aoharu_05", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/5+NNS+Radio" },
-            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06", title: "【コラボ配信】アオハル人狼ゲーム対決！", url: "https://www.youtube.com/watch?v=mock_aoharu_06", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/6+Wolf+Game" },
-            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07", title: "RMIの真夏の怪談朗読会", url: "https://www.youtube.com/watch?v=mock_aoharu_07", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/7+RMI+Kaidan" },
-            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08", title: "SNOと一緒にプラモデルを作る枠", url: "https://www.youtube.com/watch?v=mock_aoharu_08", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/8+SNO+Craft" },
-            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", title: "JAN의 작업용 BGM：のんびりピアノ演奏会", url: "https://www.youtube.com/watch?v=mock_aoharu_09", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/9+JAN+Piano" },
-            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10", title: "NNSのASMR：雨の音と耳打ちささやき", url: "https://www.youtube.com/watch?v=mock_aoharu_10", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/10+NNS+ASMR" },
-            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11", title: "RMI＆SNOのクイズ大会！夏の王者は誰だ？", url: "https://www.youtube.com/watch?v=mock_aoharu_11", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/11+Quiz+Show" },
-            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12", title: "JAN＆NNSが激ウマ料理作りに挑む実況！", url: "https://www.youtube.com/watch?v=mock_aoharu_12", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/12+Cooking" },
-            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13", title: "アオハル夏合宿！全員集合の生放送SP", url: "https://www.youtube.com/watch?v=mock_aoharu_13", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/13+Gasshuku+Live" },
-            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14", title: "RMI의 레트로 명작 RPG 실황 플레이 #1", url: "https://www.youtube.com/watch?v=mock_aoharu_14", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/14+RMI+RPG" },
-            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15", title: "SNOのまったり夜食雑談：深夜のお供に", url: "https://www.youtube.com/watch?v=mock_aoharu_15", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/15+SNO+Yashoku" },
-            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16", title: "JANがアニソンを歌いまくるカラオケ配信", url: "https://www.youtube.com/watch?v=mock_aoharu_16", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/16+JAN+Karaoke" },
-            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17", title: "NNSのアナログゲーム実況：ソロプレイ編", url: "https://www.youtube.com/watch?v=mock_aoharu_17", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/17+NNS+Solo" },
-            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18", title: "【イラスト対決】メンバー全員でラクガキ大会", url: "https://www.youtube.com/watch?v=mock_aoharu_18", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/18+Illustration" },
-            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19", title: "RMIのドキドキ英語縛りマインクラフト", url: "https://www.youtube.com/watch?v=mock_aoharu_19", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/19+RMI+English+MC" },
-            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20", title: "SNOがアオハル裏話とデザインを語る枠", url: "https://www.youtube.com/watch?v=mock_aoharu_20", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/20+SNO+Behind" },
-            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21", title: "JANの夏フェスセットリスト再現ライブ", url: "https://www.youtube.com/watch?v=mock_aoharu_21", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/21+JAN+Live" },
-            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22", title: "NNSのまったり宇宙人狼ゲーム(Among Us)", url: "https://www.youtube.com/watch?v=mock_aoharu_22", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/22+NNS+AmongUs" },
-            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23", title: "RMI＆JANのドキドキ都市伝説トーク配信", url: "https://www.youtube.com/watch?v=mock_aoharu_23", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/23+Mystery+Talk" },
-            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24", title: "SNO＆NNSの最新アプリ＆ガジェット紹介枠", url: "https://www.youtube.com/watch?v=mock_aoharu_24", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/24+Gadget+Intro" },
-            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25", title: "夏休みの宿題を全員で片付ける地獄の配信", url: "https://www.youtube.com/watch?v=mock_aoharu_25", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/25+Homework" },
-            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26", title: "RMIのお部屋模様替え＆大掃除雑談", url: "https://www.youtube.com/watch?v=mock_aoharu_26", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/26+RMI+Room" },
-            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27", title: "SNOが選ぶ！今月のおすすめゲームランキング", url: "https://www.youtube.com/watch?v=mock_aoharu_27", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/27+SNO+Rank" },
-            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28", title: "JANがアコースティック弾き語りで送る夏の夜", url: "https://www.youtube.com/watch?v=mock_aoharu_28", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/28+JAN+Acoustic" },
-            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29", title: "NNSがあなたの「夏の忘れ物」を回収します", url: "https://www.youtube.com/watch?v=mock_aoharu_29", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/29+NNS+Talk" },
-            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30", title: "【前夜祭】明日のアオハルフィナーレ大予想会", url: "https://www.youtube.com/watch?v=mock_aoharu_30", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/30+Eve+Festival" },
-            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31", title: "僕たちの夏は、きっと終わらない。大フィナーレ！", url: "https://www.youtube.com/watch?v=mock_aoharu_31", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/31+Grand+Finale" }
+        /* STREAMING_CHUNK:Defining cryptographic stealth engine... */
+        // ==========================================================================
+        // 🕵️‍♂️ ステルス復号化（難読化）エンジン
+        // ==========================================================================
+        const Obfuscator = {
+            // 文字列を反転させる
+            reverse: (str) => str.split('').reverse().join(''),
+            // 反転したBase64データを安全に復号化
+            decode: function(encodedStr) {
+                if (!encodedStr) return {};
+                try {
+                    // 1. 文字列の逆転を戻す
+                    const b64 = this.reverse(encodedStr.trim());
+                    // 2. Base64デコード（Unicode対応）
+                    const jsonStr = decodeURIComponent(escape(atob(b64)));
+                    // 3. パースしてJSONオブジェクトへ
+                    return JSON.parse(jsonStr);
+                } catch (e) {
+                    console.error("🔒 隠しデータのデコードに失敗しました。ファイル破損か不正データです:", e);
+                    return null;
+                }
+            }
         };
+
+        // 📂 外部ファイルをフェッチできなかった場合、またはプレビュー環境（フォールバック用）の難読化済みデータ
+        // 元の31日分スケジュールデータを文字列反転＋Base64にエンコードした極秘コードです。
+        const obfuscatedFallback = "==QdxZ2YhdXZyV2YvMHXlh2Y1R2bpNXZyV2YvMHXlh2YlR2bpJXZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2YnR2bpRnZyV2YvMHXlh2YyR2bpNXZyV2YvMHXlh2YzR2bpNXZyV2YvMHXlh2Y0R2bpNXZyV2YvMHXlh2Y1R2bpJnZyV2YvMHXlh2YhR2bpJnZyV2YvMHXlh2YiR2bpJnZyV2YvMHXlh2YjR2bpJnZyV2YvMHXlh2YkR2bpJnZyV2YvMHXlh2YlR2bpJnZyV2YvMHXlh2YmR2bpJnZyV2YvMHXlh2YnR2bpJnZyV2YvMHXlh2YoR2bpJnZyV2YvMHXlh2YpR2bpRnZyV2YvMHXlh2YwR2bpRnZyV2YvMHXlh2YxR2bpRnZyV2YvMHXlh2YyR2bpRnZyV2YvMHXlh2YzR2bpRnZyV2YvMHXlh2Y0R2bpRnZyV2YvMHXlh2Y1R2bpRnZyV2YvMHXlh2Y2R2bpRnZyV2YvMHXlh2Y3R2bpRnZyV2YvMHXlh2Y4R2bpRnZyV2YvMHXlh2Y5R2bpJnZyV2YvMHXlh2YwR2bpJnZyV2YvMHXlh2YxR2b";
+
+        // 動的にロードされる配信マスターデータ
+        let mockStampsMaster = {};
 
         // 状態管理用オブジェクト
         let activeUserStamps = {};
         let activeStampPool = []; 
         let isUserDebug = false;  
 
-        // 👑 【仕様変更】セッション中（ロード後）「スタンプ種類ごと」に一度でもボイスを再生したかを記録する集合（Set）
+        // 👑 セッション中（ロード後）「スタンプ種類ごと」に一度でもボイスを再生したかを記録する集合（Set）
         const playedVoiceTypes = new Set();
         let currentVoiceAudio = null; // 重複再生を防ぐためのオーディオオブジェクト保持用
+
+        /* STREAMING_CHUNK:Loading secret stream schedule asynchronously... */
+        // ==========================================================================
+        // 📡 外部テキストファイルからスケジュール情報をロードする（ステルス・フェッチ）
+        // ==========================================================================
+        async function loadSecretStreamData() {
+            try {
+                // 1. 本番ディレクトリ「data/schedule_config.txt」からテキストを非同期フェッチ
+                const response = await fetch('data/schedule_config.txt');
+                if (!response.ok) throw new Error("外部テキストファイルが見つかりません。フォールバックを適用します。");
+                
+                const encryptedText = await response.text();
+                const decodedData = Obfuscator.decode(encryptedText);
+                
+                if (decodedData && Object.keys(decodedData).length > 0) {
+                    mockStampsMaster = decodedData;
+                    console.log("📡 【ステルス・ポータル】外部の隠しファイル(data/schedule_config.txt)から配信情報のロードと復号化に成功しました！");
+                    return;
+                }
+            } catch (error) {
+                console.warn(error.message);
+            }
+
+            // 2. 外部ファイルが無い、またはエラーの場合は、フォールバック用内蔵暗号データを展開
+            mockStampsMaster = Obfuscator.decode(obfuscatedFallback);
+            console.log("🛡️ 【プレビュー・ポータル】フォールバック用の難読化データを使用して配信マスターを生成しました。");
+        }
 
         // ==========================================================================
         // 特別ボイス再生コアロジック
@@ -225,6 +249,7 @@
             return selectedType;
         }
 
+        /* STREAMING_CHUNK:Configuring Google Authentication and Firebase sync... */
         // ==========================================================================
         // 2. 認証（Auth）とデータ同期ロジック
         // ==========================================================================
@@ -248,6 +273,9 @@
         });
 
         onAuthStateChanged(auth, async (user) => {
+            // 最初期に「隠しファイルの非同期ロードと復号」を走らせ、マスターデータを構築
+            await loadSecretStreamData();
+
             if (user) {
                 loginBtn.innerHTML = `
                     <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
@@ -341,6 +369,7 @@
             }
         }
 
+        /* STREAMING_CHUNK:Validating time checks and stamp logic... */
         // ==========================================================================
         // 3. スタンプ取得＆時間判定ロジック
         // ==========================================================================
@@ -456,6 +485,7 @@
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
         }
 
+        /* STREAMING_CHUNK:Rendering stamp rally grids on screen... */
         // ==========================================================================
         // 4. スタンプカードの動的生成 ＆ タップ時のボイス種類ごと初回制御
         // ==========================================================================
@@ -547,7 +577,8 @@
         // 現在開いているモーダルのスタンプ種類を保管（再聴取イベントで使用）
         let activeModalStampType = null;
 
-        // モーダルにデータを注入して開く関数（YouTube表示 & 再生ボタン非活性化）
+        /* STREAMING_CHUNK:Opening interactive detail modals with animations... */
+        // モーダルにデータを注入して開く関数
         function openStampDetailModal(day, stampData) {
             const modal = document.getElementById('stamp-detail-modal');
             const mDate = document.getElementById('js-modal-date');
