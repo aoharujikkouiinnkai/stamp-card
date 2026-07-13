@@ -87,7 +87,7 @@
                 <h3 id="js-modal-title" class="modal-status-title">リアルタイム取得！</h3>
             </div>
             <div class="modal-body">
-                <!-- 📺 【新規】配信情報表示カード -->
+                <!-- 📺 配信情報表示カード -->
                 <div id="js-modal-stream-card" class="modal-stream-card">
                     <img id="js-modal-stream-thumb" class="stream-thumb" src="" alt="配信サムネイル">
                     <h4 id="js-modal-stream-title" class="stream-title">配信タイトル</h4>
@@ -161,7 +161,7 @@
             "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06", title: "【コラボ配信】アオハル人狼ゲーム対決！", url: "https://www.youtube.com/watch?v=mock_aoharu_06", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/6+Wolf+Game" },
             "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07", title: "RMIの真夏の怪談朗読会", url: "https://www.youtube.com/watch?v=mock_aoharu_07", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/7+RMI+Kaidan" },
             "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08", title: "SNOと一緒にプラモデルを作る枠", url: "https://www.youtube.com/watch?v=mock_aoharu_08", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/8+SNO+Craft" },
-            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", title: "JANの作業用BGM：のんびりピアノ演奏会", url: "https://www.youtube.com/watch?v=mock_aoharu_09", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/9+JAN+Piano" },
+            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", title: "JAN의 작업용 BGM：のんびりピアノ演奏会", url: "https://www.youtube.com/watch?v=mock_aoharu_09", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/9+JAN+Piano" },
             "stream_aoharu_10": { day: 10, targetDate: "2026-08-10", title: "NNSのASMR：雨の音と耳打ちささやき", url: "https://www.youtube.com/watch?v=mock_aoharu_10", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/10+NNS+ASMR" },
             "stream_aoharu_11": { day: 11, targetDate: "2026-08-11", title: "RMI＆SNOのクイズ大会！夏の王者は誰だ？", url: "https://www.youtube.com/watch?v=mock_aoharu_11", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/11+Quiz+Show" },
             "stream_aoharu_12": { day: 12, targetDate: "2026-08-12", title: "JAN＆NNSが激ウマ料理作りに挑む実況！", url: "https://www.youtube.com/watch?v=mock_aoharu_12", thumbnail: "https://placehold.co/640x360/4da6ff/ffffff?text=8/12+Cooking" },
@@ -191,12 +191,12 @@
         let activeStampPool = []; 
         let isUserDebug = false;  
 
-        // 👑 【仕様】セッション中（ロード後）一度でもボイスを再生したかを記録するフラグ
-        let hasPlayedVoiceOnce = false;
+        // 👑 【仕様変更】セッション中（ロード後）「スタンプ種類ごと」に一度でもボイスを再生したかを記録する集合（Set）
+        const playedVoiceTypes = new Set();
         let currentVoiceAudio = null; // 重複再生を防ぐためのオーディオオブジェクト保持用
 
         // ==========================================================================
-        // 🆕 特別ボイス再生コアロジック
+        // 特別ボイス再生コアロジック
         // ==========================================================================
         function playVoice(type) {
             if (currentVoiceAudio) {
@@ -456,7 +456,7 @@
         }
 
         // ==========================================================================
-        // 4. スタンプカードの動的生成 ＆ タップ時のボイス初回制御
+        // 4. スタンプカードの動的生成 ＆ タップ時のボイス種類ごと初回制御
         // ==========================================================================
         function generateStampCards() {
             const container = document.getElementById('js-cards-container');
@@ -505,12 +505,12 @@
                     const stampClickArea = slot.querySelector('.stamp-trigger');
                     if (stampClickArea && savedStamp) {
                         stampClickArea.addEventListener('click', () => {
-                            // 👑 【新規ロジック】
-                            // リアタイかつ「一度もボイスを再生していない」場合 ➔ 即ボイス再生、モーダルは開かない
-                            if (savedStamp.status === 'active' && !hasPlayedVoiceOnce) {
+                            // 👑 【仕様変更ロジック：種類ごとに初回判定】
+                            // リアタイかつ「この種類のボイスを今回のロード後に一度も再生していない」場合 ➔ 即ボイス再生、モーダルは開かない
+                            if (savedStamp.status === 'active' && !playedVoiceTypes.has(savedStamp.type)) {
                                 soundPopup.play().catch(()=>{});
                                 playVoice(savedStamp.type);
-                                hasPlayedVoiceOnce = true;
+                                playedVoiceTypes.add(savedStamp.type); // 再生済み種類リストへ追加
                             } else {
                                 // 2回目以降 or アーカイブ ➔ モーダルを通常展開
                                 soundPopup.play().catch(()=>{});
