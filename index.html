@@ -75,6 +75,7 @@
         </section>
     </main>
 
+    <!-- モーダル（配信タイトル・URL・サムネイル表示領域を追加） -->
     <div id="stamp-detail-modal" class="modal-overlay">
         <div class="glass-modal">
             <button id="js-modal-close" class="modal-close-btn" aria-label="閉じる">&times;</button>
@@ -83,6 +84,14 @@
                 <h3 id="js-modal-title" class="modal-status-title">リアルタイム取得！</h3>
             </div>
             <div class="modal-body">
+
+                <!-- 📺 配信情報表示エリア -->
+                <div class="modal-stream-card" style="margin-bottom: 15px; text-align: center; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px;">
+                    <img id="js-modal-stream-thumb" src="" alt="配信サムネイル" style="width: 100%; max-width: 280px; height: auto; border-radius: 6px; aspect-ratio: 16/9; object-fit: cover;">
+                    <h4 id="js-modal-stream-title" style="margin: 8px 0 4px; font-size: 1rem; font-weight: bold;">配信タイトル</h4>
+                    <a id="js-modal-stream-url" href="#" target="_blank" rel="noopener noreferrer" style="color: #1e88e5; font-weight: bold; font-size: 0.9rem; text-decoration: underline;">📺 配信を見る</a>
+                </div>
+
                 <div class="modal-stamp-display">
                     <img id="js-modal-img" src="" alt="獲得スタンプ">
                 </div>
@@ -124,6 +133,21 @@
         const soundError = new Audio('sounds/error.mp3'); 
         const soundPopup = new Audio('sounds/popup.mp3'); 
 
+        // 🔊 ボイス再生トラッキング & 再生管理
+        const playedVoiceTypes = new Set(); // サイトを開いてから再生済みのボイスタイプ（例: 'J1', 'R2'）
+        let currentVoiceAudio = null;
+
+        function playVoice(type) {
+            if (currentVoiceAudio) {
+                currentVoiceAudio.pause();
+                currentVoiceAudio.currentTime = 0;
+            }
+            currentVoiceAudio = new Audio(`voices/voice_${type}.wav`);
+            currentVoiceAudio.play().catch(err => {
+                console.error(`ボイス再生エラー (voices/voice_${type}.wav):`, err);
+            });
+        }
+
         // 📅 8月のスタンプカード描画用データ構造
         const stampWeeks = [
             { title: "1st Week (8/1 - 8/7)", startDay: 1, endDay: 7 },
@@ -137,49 +161,57 @@
         // 👑 12種類のリアタイスタンプマスター配列
         const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
 
-        // 📂 配信IDと日付の1対1対応リスト
+        // 📂 配信ID・日付・配信情報のマスターデータ
         const mockStampsMaster = {
-            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01" },
-            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02" },
-            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03" },
-            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04" },
-            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05" },
-            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06" },
-            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07" },
-            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08" },
-            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09" },
-            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10" },
-            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11" },
-            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12" },
-            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13" },
-            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14" },
-            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15" },
-            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16" },
-            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17" },
-            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18" },
-            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19" },
-            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20" },
-            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21" },
-            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22" },
-            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23" },
-            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24" },
-            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25" },
-            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26" },
-            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27" },
-            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28" },
-            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29" },
-            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30" },
-            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31" }
+            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01", title: "【DAY1】アオハル8月スタンプラリー開幕配信！", url: "https://youtube.com/watch?v=stream01", thumbnail: "images/thumb_01.png" },
+            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02", title: "【DAY2】夏休み特別コラボトーク！", url: "https://youtube.com/watch?v=stream02", thumbnail: "images/thumb_02.png" },
+            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03", title: "【DAY3】深夜のまったりゲーム配信", url: "https://youtube.com/watch?v=stream03", thumbnail: "images/thumb_03.png" },
+            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04", title: "【DAY4】メンバー総出演スペシャル", url: "https://youtube.com/watch?v=stream04", thumbnail: "images/thumb_04.png" },
+            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05", title: "【DAY5】夏の思い出雑談会", url: "https://youtube.com/watch?v=stream05", thumbnail: "images/thumb_05.png" },
+            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06", title: "【DAY6】歌枠特別ライブ配信", url: "https://youtube.com/watch?v=stream06", thumbnail: "images/thumb_06.png" },
+            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07", title: "【DAY7】第1週目振り返り＆企画発表", url: "https://youtube.com/watch?v=stream07", thumbnail: "images/thumb_07.png" },
+            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08", title: "【DAY8】8月8日ゾロ目記念配信！", url: "https://youtube.com/watch?v=stream08", thumbnail: "images/thumb_08.png" },
+            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09", title: "【DAY9】日曜夜のまったりラジオ", url: "https://youtube.com/watch?v=stream09", thumbnail: "images/thumb_09.png" },
+            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10", title: "【DAY10】10日達成記念配信", url: "https://youtube.com/watch?v=stream10", thumbnail: "images/thumb_10.png" },
+            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11", title: "【DAY11】山の日特別企画", url: "https://youtube.com/watch?v=stream11", thumbnail: "images/thumb_11.png" },
+            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12", title: "【DAY12】夏のホラーゲーム実況", url: "https://youtube.com/watch?v=stream12", thumbnail: "images/thumb_12.png" },
+            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13", title: "【DAY13】お盆休み突入スぺシャル", url: "https://youtube.com/watch?v=stream13", thumbnail: "images/thumb_13.png" },
+            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14", title: "【DAY14】折り返し地点！2週間感謝配信", url: "https://youtube.com/watch?v=stream14", thumbnail: "images/thumb_14.png" },
+            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15", title: "【DAY15】後半戦突入！特別生放送", url: "https://youtube.com/watch?v=stream15", thumbnail: "images/thumb_15.png" },
+            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16", title: "【DAY16】夏祭り企画配信", url: "https://youtube.com/watch?v=stream16", thumbnail: "images/thumb_16.png" },
+            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17", title: "【DAY17】月曜夜の元気が出る配信", url: "https://youtube.com/watch?v=stream17", thumbnail: "images/thumb_17.png" },
+            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18", title: "【DAY18】オリジナルソング制作裏話", url: "https://youtube.com/watch?v=stream18", thumbnail: "images/thumb_18.png" },
+            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19", title: "【DAY19】深夜のQ&A質問コーナー", url: "https://youtube.com/watch?v=stream19", thumbnail: "images/thumb_19.png" },
+            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20", title: "【DAY20】残り11日！カウントダウン配信", url: "https://youtube.com/watch?v=stream20", thumbnail: "images/thumb_20.png" },
+            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21", title: "【DAY21】第3週目締めくくり配信", url: "https://youtube.com/watch?v=stream21", thumbnail: "images/thumb_21.png" },
+            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22", title: "【DAY22】土曜夜の特別カラオケ枠", url: "https://youtube.com/watch?v=stream22", thumbnail: "images/thumb_22.png" },
+            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23", title: "【DAY23】夏の思い出写真館", url: "https://youtube.com/watch?v=stream23", thumbnail: "images/thumb_23.png" },
+            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24", title: "【DAY24】ラスト1週間直前スペシャル", url: "https://youtube.com/watch?v=stream24", thumbnail: "images/thumb_24.png" },
+            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25", title: "【DAY25】残り6日！ラストスパート配信", url: "https://youtube.com/watch?v=stream25", thumbnail: "images/thumb_25.png" },
+            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26", title: "【DAY26】メンバー対抗対戦企画", url: "https://youtube.com/watch?v=stream26", thumbnail: "images/thumb_26.png" },
+            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27", title: "【DAY27】アオハル実行委員会思い出雑談", url: "https://youtube.com/watch?v=stream27", thumbnail: "images/thumb_27.png" },
+            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28", title: "【DAY28】第4週目完走！グランドフィナーレ前夜", url: "https://youtube.com/watch?v=stream28", thumbnail: "images/thumb_28.png" },
+            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29", title: "【DAY29】ラスト3日！特別ライブ配信", url: "https://youtube.com/watch?v=stream29", thumbnail: "images/thumb_29.png" },
+            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30", title: "【DAY30】夏の終わり前夜祭スペシャル", url: "https://youtube.com/watch?v=stream30", thumbnail: "images/thumb_30.png" },
+            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31", title: "【DAY31】アオハル8月スタンプラリー最終日！グランドフィナーレ", url: "https://youtube.com/watch?v=stream31", thumbnail: "images/thumb_31.png" }
         };
+
+        // 日付から配信情報を取得するヘルパー関数
+        function getStreamInfoByDay(day) {
+            const entry = Object.values(mockStampsMaster).find(item => item.day === day);
+            return entry || {
+                title: `8月${day}日 特別配信`,
+                url: "#",
+                thumbnail: "images/thumb_default.png"
+            };
+        }
 
         // 状態管理用オブジェクト
         let activeUserStamps = {};
         let activeStampPool = []; 
         let isUserDebug = false;  
 
-        // ==========================================================================
         // 重複なしランダム抽選 ＆ 自動リセットコアシステム
-        // ==========================================================================
         function drawRandomStampType() {
             if (!activeStampPool || activeStampPool.length === 0) {
                 activeStampPool = [...ALL_STAMP_TYPES];
@@ -191,9 +223,7 @@
             return selectedType;
         }
 
-        // ==========================================================================
-        // 2. 認証（Auth）とデータ同期ロジック
-        // ==========================================================================
+        // 認証（Auth）とデータ同期ロジック
         const loginBtn = document.getElementById('google-login-btn');
 
         loginBtn.addEventListener('click', async () => {
@@ -307,9 +337,7 @@
             }
         }
 
-        // ==========================================================================
-        // 3. スタンプ取得＆時間判定ロジック
-        // ==========================================================================
+        // スタンプ取得＆時間判定ロジック
         function checkUrlParameterForStamp() {
             const urlParams = new URLSearchParams(window.location.search);
             const streamId = urlParams.get('id');
@@ -422,9 +450,7 @@
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
         }
 
-        // ==========================================================================
-        // 4. スタンプカードの動的生成 ＆ モーダル連動制御
-        // ==========================================================================
+        // スタンプカードの動的生成 ＆ タップ処理
         function generateStampCards() {
             const container = document.getElementById('js-cards-container');
             if (!container) return;
@@ -472,8 +498,21 @@
                     const stampClickArea = slot.querySelector('.stamp-trigger');
                     if (stampClickArea && savedStamp) {
                         stampClickArea.addEventListener('click', () => {
-                            soundPopup.play().catch(()=>{});
-                            openStampDetailModal(day, savedStamp);
+                            if (savedStamp.status === 'active') {
+                                // 1年目・初回タップ時（そのボイス種類をまだ聴いていない場合）：即ボイス再生
+                                if (!playedVoiceTypes.has(savedStamp.type)) {
+                                    playedVoiceTypes.add(savedStamp.type);
+                                    playVoice(savedStamp.type);
+                                } else {
+                                    // 2回目以降：モーダルを表示
+                                    soundPopup.play().catch(()=>{});
+                                    openStampDetailModal(day, savedStamp);
+                                }
+                            } else if (savedStamp.status === 'archive') {
+                                // アーカイブスタンプ：モーダルを表示
+                                soundPopup.play().catch(()=>{});
+                                openStampDetailModal(day, savedStamp);
+                            }
                         });
                     }
 
@@ -500,6 +539,17 @@
             const mDesc = document.getElementById('js-modal-desc');
             const mVoiceBtn = document.getElementById('js-modal-voice-btn');
 
+            // 配信情報要素
+            const mStreamTitle = document.getElementById('js-modal-stream-title');
+            const mStreamUrl = document.getElementById('js-modal-stream-url');
+            const mStreamThumb = document.getElementById('js-modal-stream-thumb');
+
+            // 配信情報のセット
+            const streamInfo = getStreamInfoByDay(day);
+            mStreamTitle.innerText = streamInfo.title;
+            mStreamUrl.href = streamInfo.url;
+            mStreamThumb.src = streamInfo.thumbnail;
+
             mDate.innerText = `8/${day}`;
 
             if (stampData.status === 'active') {
@@ -507,13 +557,19 @@
                 mTitle.className = "modal-status-title status-active";
                 mImg.src = `images/stamp_${stampData.type}.png`;
                 mDesc.innerText = `8月${day}日の配信をリアルタイムで一緒に過ごした特別な証です！このスタンプ限定の特別なメンバーボイスをお楽しみいただけます。`;
+                
                 mVoiceBtn.style.display = "inline-flex"; 
+                mVoiceBtn.onclick = () => {
+                    playVoice(stampData.type);
+                };
             } else {
                 mTitle.innerText = "アーカイブ視聴";
                 mTitle.className = "modal-status-title status-archive";
                 mImg.src = `images/stamp_archive.png`;
                 mDesc.innerText = `8月${day}日の配信アーカイブを視聴した思い出の記録スタンプです。（※リアルタイム限定特典ボイスは含まれません）`;
+                
                 mVoiceBtn.style.display = "none"; 
+                mVoiceBtn.onclick = null;
             }
 
             modal.classList.add('is-open');
@@ -533,11 +589,6 @@
             }
         });
         modalCloseBtn.addEventListener('click', closeStampDetailModal);
-
-        // 限定ボイス再生ボタンの仮イベント設定
-        document.getElementById('js-modal-voice-btn').addEventListener('click', () => {
-            alert("🎵 アオハル実行委員会メンバーからの特別ボイスを再生します！（※実装時にお好みの音声ファイルを指定してください）");
-        });
     </script>
 </body>
 </html>
