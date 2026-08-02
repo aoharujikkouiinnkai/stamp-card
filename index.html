@@ -6,9 +6,157 @@
     <title>アオハル8月スタンプラリー</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght=300;400;700&display=swap" rel="stylesheet">  
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/popup.css">
-    <link rel="stylesheet" href="css/animation.css">
-    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+        /* モーダル全体の背景（暗幕＋ボカシ） */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        /* 開いているときの状態 */
+        .modal-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* モーダルコンテンツ（ガラスパネル） */
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 420px;
+            padding: 32px 24px;
+            box-sizing: border-box;
+            position: relative;
+            text-align: center;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.is-open .glass-modal {
+            transform: translateY(0) scale(1);
+        }
+        /* 閉じるボタン */
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #8899a6;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .modal-close-btn:hover {
+            color: #334455;
+            transform: rotate(90deg);
+        }
+        /* 日付バッジ */
+        .modal-date-badge {
+            display: inline-block;
+            background: rgba(0, 150, 255, 0.1);
+            color: #0077ff;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        /* ステータスタイトル */
+        .modal-status-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            letter-spacing: 0.05em;
+        }
+        .modal-status-title.status-active {
+            color: #20b2aa; 
+            text-shadow: 0 0 10px rgba(32, 178, 170, 0.2);
+        }
+        .modal-status-title.status-archive {
+            color: #667788; 
+        }
+        /* スタンプ表示エリア */
+        .modal-stamp-display {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.05), 0 8px 16px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .modal-stamp-display img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            animation: stampBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+        /* 説明文 */
+        .modal-text {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin: 0 0 24px 0;
+            padding: 0 10px;
+        }
+        /* アクションエリア */
+        .modal-action-area {
+            display: flex;
+            justify-content: center;
+        }
+        .btn-voice {
+            background: linear-gradient(135deg, #4da6ff, #0077ff);
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 119, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .btn-voice:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 255, 0.4);
+            background: linear-gradient(135deg, #66b3ff, #1a85ff);
+        }
+        .btn-voice:active {
+            transform: translateY(1px);
+        }
+        
+        /* スタンプ出現アニメーション */
+        @keyframes stampBounce {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
@@ -27,15 +175,15 @@
             
             <div class="member-wrapper member-rmi position-low" onclick="location.href='profile.html?member=rmi'">
                 <div class="stand-image-container">
-                    <img src="images/AoharuRMI.png" alt="るみぃ" class="member-img">
-                    <span class="member-name-tag">るみぃ</span>
+                    <img src="images/AoharuRMI.png" alt="RMI" class="member-img">
+                    <span class="member-name-tag">RMI</span>
                 </div>
             </div>
 
             <div class="member-wrapper member-sno position-high" onclick="location.href='profile.html?member=sno'">
                 <div class="stand-image-container">
-                    <img src="images/AoharuSNO.png" alt="しの*" class="member-img">
-                    <span class="member-name-tag">しの*</span>
+                    <img src="images/AoharuSNO.png" alt="SNO" class="member-img">
+                    <span class="member-name-tag">SNO</span>
                 </div>
             </div>
 
@@ -52,15 +200,15 @@
 
             <div class="member-wrapper member-jan position-high" onclick="location.href='profile.html?member=jan'">
                 <div class="stand-image-container">
-                    <img src="images/AoharuJAN.png" alt="じゃんきー。" class="member-img">
-                    <span class="member-name-tag">じゃんきー。</span>
+                    <img src="images/AoharuJAN.png" alt="JAN" class="member-img">
+                    <span class="member-name-tag">JAN</span>
                 </div>
             </div>
 
             <div class="member-wrapper member-nns position-low" onclick="location.href='profile.html?member=nns'">
                 <div class="stand-image-container">
-                    <img src="images/AoharuNNS.png" alt="名無し学生" class="member-img">
-                    <span class="member-name-tag">名無し学生</span>
+                    <img src="images/AoharuNNS.png" alt="NNS" class="member-img">
+                    <span class="member-name-tag">NNS</span>
                 </div>
             </div>
 
@@ -86,15 +234,6 @@
                 <h3 id="js-modal-title" class="modal-status-title">リアルタイム取得！</h3>
             </div>
             <div class="modal-body">
-                <div id="js-modal-stream-card" class="modal-stream-card">
-                    <img id="js-modal-stream-thumb" class="stream-thumb" src="" alt="配信サムネイル">
-                    <h4 id="js-modal-stream-title" class="stream-title">配信タイトル</h4>
-                    <a id="js-modal-stream-link" class="btn-stream-link" href="#" target="_blank">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                        YouTubeで配信を見る
-                    </a>
-                </div>
-
                 <div class="modal-stamp-display">
                     <img id="js-modal-img" src="" alt="獲得スタンプ">
                 </div>
@@ -103,13 +242,453 @@
                 <div class="modal-action-area">
                     <button id="js-modal-voice-btn" class="btn-voice">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M8 5v14l11-7z"/></svg>
-                        <span>ボイスをもう一度聴く</span>
+                        <span>限定ボイスを聴く</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 1. Firebase初期化（実際のConfigに書き換えてください）
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // 🎵 効果音の定義
+        const soundGet = new Audio('sounds/get.mp3');     
+        const soundReal = new Audio('sounds/real.mp3');   
+        const soundError = new Audio('sounds/error.mp3'); 
+        const soundPopup = new Audio('sounds/popup.mp3'); 
+
+        // 📅 8月のスタンプカード描画用データ構造
+        const stampWeeks = [
+            { title: "1st Week (8/1 - 8/7)", startDay: 1, endDay: 7 },
+            { title: "2nd Week (8/8 - 8/14)", startDay: 8, endDay: 14 },
+            { title: "3rd Week (8/15 - 8/21)", startDay: 15, endDay: 21 },
+            { title: "4th Week (8/22 - 8/28)", startDay: 22, endDay: 28 },
+            { title: "5th Week (8/29 - 8/31)", startDay: 29, endDay: 31 }
+        ];
+        const xPositions = [16.2, 28.3, 39.4, 50.9, 61.9, 72.9, 84.4];
+
+        // 👑 12種類のリアタイスタンプマスター配列
+        const ALL_STAMP_TYPES = ["R1", "R2", "R3", "S1", "S2", "S3", "J1", "J2", "J3", "N1", "N2", "N3"];
+
+        // 📂 配信IDと日付の1対1対応リスト
+        const mockStampsMaster = {
+            "stream_aoharu_01": { day: 1,  targetDate: "2026-08-01" },
+            "stream_aoharu_02": { day: 2,  targetDate: "2026-08-02" },
+            "stream_aoharu_03": { day: 3,  targetDate: "2026-08-03" },
+            "stream_aoharu_04": { day: 4,  targetDate: "2026-08-04" },
+            "stream_aoharu_05": { day: 5,  targetDate: "2026-08-05" },
+            "stream_aoharu_06": { day: 6,  targetDate: "2026-08-06" },
+            "stream_aoharu_07": { day: 7,  targetDate: "2026-08-07" },
+            "stream_aoharu_08": { day: 8,  targetDate: "2026-08-08" },
+            "stream_aoharu_09": { day: 9,  targetDate: "2026-08-09" },
+            "stream_aoharu_10": { day: 10, targetDate: "2026-08-10" },
+            "stream_aoharu_11": { day: 11, targetDate: "2026-08-11" },
+            "stream_aoharu_12": { day: 12, targetDate: "2026-08-12" },
+            "stream_aoharu_13": { day: 13, targetDate: "2026-08-13" },
+            "stream_aoharu_14": { day: 14, targetDate: "2026-08-14" },
+            "stream_aoharu_15": { day: 15, targetDate: "2026-08-15" },
+            "stream_aoharu_16": { day: 16, targetDate: "2026-08-16" },
+            "stream_aoharu_17": { day: 17, targetDate: "2026-08-17" },
+            "stream_aoharu_18": { day: 18, targetDate: "2026-08-18" },
+            "stream_aoharu_19": { day: 19, targetDate: "2026-08-19" },
+            "stream_aoharu_20": { day: 20, targetDate: "2026-08-20" },
+            "stream_aoharu_21": { day: 21, targetDate: "2026-08-21" },
+            "stream_aoharu_22": { day: 22, targetDate: "2026-08-22" },
+            "stream_aoharu_23": { day: 23, targetDate: "2026-08-23" },
+            "stream_aoharu_24": { day: 24, targetDate: "2026-08-24" },
+            "stream_aoharu_25": { day: 25, targetDate: "2026-08-25" },
+            "stream_aoharu_26": { day: 26, targetDate: "2026-08-26" },
+            "stream_aoharu_27": { day: 27, targetDate: "2026-08-27" },
+            "stream_aoharu_28": { day: 28, targetDate: "2026-08-28" },
+            "stream_aoharu_29": { day: 29, targetDate: "2026-08-29" },
+            "stream_aoharu_30": { day: 30, targetDate: "2026-08-30" },
+            "stream_aoharu_31": { day: 31, targetDate: "2026-08-31" }
+        };
+
+        // 状態管理用オブジェクト
+        let activeUserStamps = {};
+        let activeStampPool = []; 
+        let isUserDebug = false;  
+
+        // ==========================================================================
+        // 重複なしランダム抽選 ＆ 自動リセットコアシステム
+        // ==========================================================================
+        function drawRandomStampType() {
+            if (!activeStampPool || activeStampPool.length === 0) {
+                activeStampPool = [...ALL_STAMP_TYPES];
+                console.log("🔄 【システム通知】12種類すべてのスタンプが出尽くしたため、プールをリセットしました！");
+            }
+            const randomIndex = Math.floor(Math.random() * activeStampPool.length);
+            const selectedType = activeStampPool.splice(randomIndex, 1)[0];
+            console.log(`🎲 残りプール数: ${activeStampPool.length} / 今回当選: ${selectedType}`);
+            return selectedType;
+        }
+
+        // ==========================================================================
+        // 2. 認証（Auth）とデータ同期ロジック
+        // ==========================================================================
+        const loginBtn = document.getElementById('google-login-btn');
+
+        loginBtn.addEventListener('click', async () => {
+            if (auth.currentUser) {
+                if(confirm("ログアウトしますか？")) {
+                    await signOut(auth);
+                    alert('ログアウトしました。');
+                }
+                return;
+            }
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("ログインエラー:", error);
+                soundError.play().catch(()=>{});
+                alert("ログインに失敗しました。");
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginBtn.innerHTML = `
+                    <img src="${user.photoURL}" alt="User Avatar" class="google-icon" style="border-radius: 50%;">
+                    <span>ログアウト</span>
+                `;
+                await syncLocalStorageAndFirestore(user);
+            } else {
+                loginBtn.innerHTML = `
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+                    <span>Googleでログイン</span>
+                `;
+                isUserDebug = false; 
+                loadLocalStamps();
+            }
+        });
+
+        function loadLocalStamps() {
+            const localData = localStorage.getItem('aoharu_stamps');
+            activeUserStamps = localData ? JSON.parse(localData) : {};
+            const localPool = localStorage.getItem('aoharu_stamp_pool');
+            activeStampPool = localPool ? JSON.parse(localPool) : [...ALL_STAMP_TYPES];
+
+            generateStampCards();
+            checkUrlParameterForStamp();
+        }
+
+        async function syncLocalStorageAndFirestore(user) {
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                let firestoreStamps = {};
+                let firestorePool = [];
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    firestoreStamps = data.stamps || {};
+                    firestorePool = data.stampPool || [];
+                    isUserDebug = data.debug || false; 
+                } else {
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        createdAt: new Date().toISOString(),
+                        debug: false, 
+                        stamps: {},
+                        stampPool: [...ALL_STAMP_TYPES]
+                    });
+                    firestorePool = [...ALL_STAMP_TYPES];
+                }
+
+                const localPoolStr = localStorage.getItem('aoharu_stamp_pool');
+                const localPool = localPoolStr ? JSON.parse(localPoolStr) : [...ALL_STAMP_TYPES];
+
+                if (userSnap.exists() && firestorePool.length > 0) {
+                    activeStampPool = firestorePool;
+                } else {
+                    activeStampPool = localPool;
+                }
+
+                const localDataStr = localStorage.getItem('aoharu_stamps');
+                const localStamps = localDataStr ? JSON.parse(localDataStr) : {};
+                let mergedStamps = { ...firestoreStamps };
+
+                Object.keys(localStamps).forEach(key => {
+                    const localItem = localStamps[key];
+                    const firestoreItem = firestoreStamps[key];
+
+                    if (!firestoreItem) {
+                        mergedStamps[key] = localItem;
+                    } else if (localItem.status === 'active' && firestoreItem.status !== 'active') {
+                        mergedStamps[key] = localItem;
+                    }
+                });
+
+                activeUserStamps = mergedStamps;
+
+                await updateDoc(userRef, { 
+                    stamps: mergedStamps,
+                    stampPool: activeStampPool
+                });
+                localStorage.setItem('aoharu_stamps', JSON.stringify(mergedStamps));
+                localStorage.setItem('aoharu_stamp_pool', JSON.stringify(activeStampPool));
+
+                generateStampCards();
+                checkUrlParameterForStamp();
+
+            } catch (error) {
+                console.error("同期エラー:", error);
+            }
+        }
+
+        // ==========================================================================
+        // 3. スタンプ取得＆時間判定ロジック
+        // ==========================================================================
+        function checkUrlParameterForStamp() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamId = urlParams.get('id');
+            
+            if (!streamId) return;
+
+            const stampMaster = mockStampsMaster[streamId];
+            if (!stampMaster) {
+                soundError.play().catch(()=>{});
+                alert("無効なスタンプURLです。");
+                removeUrlParameter();
+                return;
+            }
+
+            const stampKey = `day_${stampMaster.day}`;
+
+            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'active') {
+                soundError.play().catch(()=>{});
+                alert("この日付のスタンプはすでに取得しています！");
+                removeUrlParameter();
+                return;
+            }
+
+            let finalStatus = 'none';
+
+            if (isUserDebug) {
+                const debugChoice = confirm(
+                    `【デバッグ特権モード】\n8月${stampMaster.day}日のスタンプを強制追加します。\n\n[OK] ➔ リアタイ判定 (active)\n[キャンセル] ➔ アーカイブ判定 (archive)`
+                );
+                finalStatus = debugChoice ? 'active' : 'archive';
+            } else {
+                const now = new Date();
+                const startTime = new Date(`${stampMaster.targetDate}T21:00:00+09:00`);
+                const endTime = new Date(`${stampMaster.targetDate}T23:59:59+09:00`);
+                
+                if (now < startTime) {
+                    soundError.play().catch(()=>{});
+                    alert("配信前のため、まだスタンプは取得できません！");
+                    removeUrlParameter();
+                    return;
+                } else if (now >= startTime && now <= endTime) {
+                    finalStatus = 'active';
+                } else {
+                    finalStatus = 'archive';
+                }
+            }
+
+            if (activeUserStamps[stampKey] && activeUserStamps[stampKey].status === 'archive' && finalStatus === 'archive') {
+                soundError.play().catch(()=>{});
+                alert("この日付のスタンプはすでに取得しています！");
+                removeUrlParameter();
+                return;
+            }
+
+            let finalType = '';
+            if (finalStatus === 'active') {
+                if (activeUserStamps[stampKey] && activeUserStamps[stampKey].type) {
+                    finalType = activeUserStamps[stampKey].type;
+                } else {
+                    finalType = drawRandomStampType();
+                }
+            } else {
+                finalType = 'archive';
+            }
+
+            saveAcquiredStamp(stampKey, finalStatus, finalType, stampMaster.day);
+        }
+
+        async function saveAcquiredStamp(stampKey, status, type, dayNumber) {
+            const stampPayload = {
+                status: status,
+                type: type, 
+                updatedAt: new Date().toISOString()
+            };
+
+            activeUserStamps[stampKey] = stampPayload;
+
+            localStorage.setItem('aoharu_stamps', JSON.stringify(activeUserStamps));
+            localStorage.setItem('aoharu_stamp_pool', JSON.stringify(activeStampPool));
+
+            if (auth.currentUser) {
+                try {
+                    const userRef = doc(db, "users", auth.currentUser.uid);
+                    await updateDoc(userRef, { 
+                        [`stamps.${stampKey}`]: stampPayload,
+                        stampPool: activeStampPool
+                    });
+                } catch (e) {
+                    console.error("Firestoreへのスタンプ書き込み失敗:", e);
+                }
+            }
+
+            if (status === 'active') {
+                soundGet.play().catch(()=>{});
+                setTimeout(() => {
+                    soundReal.play().catch(()=>{});
+                    alert(`🎉 8/${dayNumber} リアルタイム視聴スタンプをゲットしました！`);
+                }, 400);
+            } else {
+                soundGet.play().catch(()=>{});
+                alert(`🎬 8/${dayNumber} アーカイブスタンプをゲットしました！`);
+            }
+
+            generateStampCards();
+            removeUrlParameter();
+        }
+
+        function removeUrlParameter() {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
+
+        // ==========================================================================
+        // 4. スタンプカードの動的生成 ＆ モーダル連動制御
+        // ==========================================================================
+        function generateStampCards() {
+            const container = document.getElementById('js-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            stampWeeks.forEach((week) => {
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'stamp-card-wrapper';
+
+                const cardInner = document.createElement('div');
+                cardInner.className = 'stamp-card-inner';
+                cardInner.innerHTML = `<img src="images/cardhaikei.png" alt="Card Background" class="card-bg-img">`;
+
+                let index = 0;
+                for (let day = week.startDay; day <= week.endDay; day++) {
+                    const slot = document.createElement('div');
+                    slot.className = `stamp-slot slot-day-${day}`;
+                    slot.style.left = `${xPositions[index]}%`;
+                    slot.style.top = index % 2 === 0 ? '75.5%' : '34%'; 
+
+                    const stampKey = `day_${day}`;
+                    const savedStamp = activeUserStamps[stampKey];
+
+                    let stampContent = '';
+
+                    if (savedStamp && savedStamp.status === 'active') {
+                        stampContent = `<div class="stamp-trigger">
+                                            <img src="images/stamp_${savedStamp.type}.png" alt="リアタイスタンプ" class="stamp-icon active">
+                                        </div>`;
+                    } else if (savedStamp && savedStamp.status === 'archive') {
+                        stampContent = `<div class="stamp-trigger">
+                                            <img src="images/stamp_archive.png" alt="アーカイブスタンプ" class="stamp-icon active">
+                                        </div>`;
+                    } else {
+                        stampContent = `<div class="stamp-trigger">
+                                            <div class="stamp-placeholder"></div>
+                                        </div>`;
+                    }
+
+                    slot.innerHTML = `
+                        <span class="date-badge">8/${day}</span>
+                        ${stampContent}
+                    `;
+                    
+                    const stampClickArea = slot.querySelector('.stamp-trigger');
+                    if (stampClickArea && savedStamp) {
+                        stampClickArea.addEventListener('click', () => {
+                            soundPopup.play().catch(()=>{});
+                            openStampDetailModal(day, savedStamp);
+                        });
+                    }
+
+                    cardInner.appendChild(slot);
+                    index++;
+                }
+
+                const cardFooter = document.createElement('div');
+                cardFooter.className = 'card-footer-info';
+                cardFooter.innerText = week.title;
+
+                cardWrapper.appendChild(cardInner);
+                cardWrapper.appendChild(cardFooter);
+                container.appendChild(cardWrapper);
+            });
+        }
+
+        // モーダルにデータを注入して開く関数
+        function openStampDetailModal(day, stampData) {
+            const modal = document.getElementById('stamp-detail-modal');
+            const mDate = document.getElementById('js-modal-date');
+            const mTitle = document.getElementById('js-modal-title');
+            const mImg = document.getElementById('js-modal-img');
+            const mDesc = document.getElementById('js-modal-desc');
+            const mVoiceBtn = document.getElementById('js-modal-voice-btn');
+
+            mDate.innerText = `8/${day}`;
+
+            if (stampData.status === 'active') {
+                mTitle.innerText = "リアルタイム達成！";
+                mTitle.className = "modal-status-title status-active";
+                mImg.src = `images/stamp_${stampData.type}.png`;
+                mDesc.innerText = `8月${day}日の配信をリアルタイムで一緒に過ごした特別な証です！このスタンプ限定の特別なメンバーボイスをお楽しみいただけます。`;
+                mVoiceBtn.style.display = "inline-flex"; 
+            } else {
+                mTitle.innerText = "アーカイブ視聴";
+                mTitle.className = "modal-status-title status-archive";
+                mImg.src = `images/stamp_archive.png`;
+                mDesc.innerText = `8月${day}日の配信アーカイブを視聴した思い出の記録スタンプです。（※リアルタイム限定特典ボイスは含まれません）`;
+                mVoiceBtn.style.display = "none"; 
+            }
+
+            modal.classList.add('is-open');
+        }
+
+        // モーダルを閉じる一連のイベントリスナー設定
+        const modalOverlay = document.getElementById('stamp-detail-modal');
+        const modalCloseBtn = document.getElementById('js-modal-close');
+        
+        function closeStampDetailModal() {
+            modalOverlay.classList.remove('is-open');
+        }
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                closeStampDetailModal();
+            }
+        });
+        modalCloseBtn.addEventListener('click', closeStampDetailModal);
+
+        // 限定ボイス再生ボタンの仮イベント設定
+        document.getElementById('js-modal-voice-btn').addEventListener('click', () => {
+            alert("🎵 アオハル実行委員会メンバーからの特別ボイスを再生します！（※実装時にお好みの音声ファイルを指定してください）");
+        });
+    </script>
 </body>
 </html>
